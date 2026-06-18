@@ -1,14 +1,22 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Loader2, Users, KeyRound } from 'lucide-react'
+import { KeyRound, Loader2, LockKeyhole, Pencil, Plus, Trash2, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
+import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Permissions } from '@/permissions/rbac'
 import { useRoleList, useDeleteRole } from '../hooks/use-roles'
 import { RoleFormDialog } from './role-form-dialog'
 import { RolePermissionDialog } from './role-permission-dialog'
+import { getRoleDisplayName, isProtectedRole } from '../lib/role-guards'
 import type { AdminRole } from '../types'
+
+const ROLE_MANAGE_CODES = [
+  Permissions.ROLE_MANAGE,
+  Permissions.ROLE_MANAGE_LEGACY,
+] as const
 
 export function RoleListView() {
   const { data: roles, isLoading } = useRoleList()
@@ -20,6 +28,7 @@ export function RoleListView() {
   const [permRole, setPermRole] = useState<AdminRole | null>(null)
 
   const handleEdit = (item: AdminRole) => {
+    if (isProtectedRole(item)) return
     setEditData(item)
     setFormOpen(true)
   }
@@ -31,6 +40,7 @@ export function RoleListView() {
 
   const handleDelete = async () => {
     if (!deleteTarget) return
+    if (isProtectedRole(deleteTarget)) return
     await deleteMutation.mutateAsync(deleteTarget.id)
     setDeleteTarget(null)
   }
@@ -43,7 +53,7 @@ export function RoleListView() {
           <h1 className="text-2xl font-semibold">角色管理</h1>
           <p className="mt-1 text-sm text-muted-foreground">管理系统角色与权限分配</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} permission={ROLE_MANAGE_CODES}>
           <Plus className="size-4" />
           新增角色
         </Button>
@@ -61,32 +71,72 @@ export function RoleListView() {
         </Card>
       ) : (
         <div className="grid gap-3">
-          {roles.map((item) => (
-            <Card key={item.id} className="flex items-center justify-between p-4 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Users className="size-5 text-primary" />
+          {roles.map((item) => {
+            const protectedRole = isProtectedRole(item)
+
+            return (
+              <Card
+                key={item.id}
+                className="flex flex-col gap-4 rounded-2xl p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
+              >
+                <div className="flex items-center gap-4">
+                  <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10">
+                    {protectedRole ? (
+                      <LockKeyhole className="size-5 text-primary" />
+                    ) : (
+                      <Users className="size-5 text-primary" />
+                    )}
+                  </div>
+                  <div>
+                    <div className="flex flex-wrap items-center gap-2 font-medium">
+                      <span>{getRoleDisplayName(item)}</span>
+                      {protectedRole && (
+                        <Badge variant="secondary" className="rounded-lg">
+                          系统内置
+                        </Badge>
+                      )}
+                    </div>
+                    {item.description && (
+                      <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
+                    )}
+                  </div>
                 </div>
-                <div>
-                  <div className="font-medium">{item.rname}</div>
-                  {item.description && (
-                    <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
-                  )}
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={() => setPermRole(item)} title="分配权限">
-                  <KeyRound className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                  <Pencil className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(item)}>
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </div>
-            </Card>
-          ))}
+                {protectedRole ? (
+                  <p className="text-sm text-muted-foreground">超级管理员角色不可查看、编辑或修改权限</p>
+                ) : (
+                  <div className="flex items-center gap-1 self-end sm:self-auto">
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      permission={ROLE_MANAGE_CODES}
+                      onClick={() => setPermRole(item)}
+                      title="分配权限"
+                    >
+                      <KeyRound className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      permission={ROLE_MANAGE_CODES}
+                      onClick={() => handleEdit(item)}
+                      title="编辑角色"
+                    >
+                      <Pencil className="size-4" />
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      permission={ROLE_MANAGE_CODES}
+                      onClick={() => setDeleteTarget(item)}
+                      title="删除角色"
+                    >
+                      <Trash2 className="size-4 text-destructive" />
+                    </Button>
+                  </div>
+                )}
+              </Card>
+            )
+          })}
         </div>
       )}
 
@@ -107,12 +157,17 @@ export function RoleListView() {
           <DialogHeader>
             <DialogTitle>确认删除</DialogTitle>
             <DialogDescription>
-              确定要删除角色「{deleteTarget?.rname}」吗？此操作不可撤销。
+              确定要删除角色「{deleteTarget ? getRoleDisplayName(deleteTarget) : ''}」吗？此操作不可撤销。
             </DialogDescription>
           </DialogHeader>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+            <Button
+              variant="destructive"
+              permission={ROLE_MANAGE_CODES}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
               {deleteMutation.isPending && <Loader2 className="size-4 animate-spin" />}
               删除
             </Button>

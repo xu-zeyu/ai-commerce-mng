@@ -1,5 +1,40 @@
 import type { AdminPermission, PermissionTreeNode } from '../types'
 
+const CODE_LABELS: Record<string, string> = {
+  admin: '管理员',
+  category: '分类',
+  create: '新增',
+  dashboard: '工作台',
+  delete: '删除',
+  goods: '商品',
+  list: '列表',
+  manage: '管理',
+  order: '订单',
+  page: '分页',
+  permission: '权限',
+  product: '商品',
+  read: '查看',
+  role: '角色',
+  setting: '设置',
+  settings: '设置',
+  store: '店铺',
+  sub: '超级管理员',
+  tree: '树形',
+  update: '编辑',
+  user: '用户',
+  view: '查看',
+}
+
+const FULL_CODE_LABELS: Record<string, string> = {
+  SUB_ADMIN: '超级管理员',
+  GOODS_CATEGORY_CREATE: '商品分类新增',
+  GOODS_CATEGORY_PAGE: '商品分类分页',
+  GOODS_CATEGORY_TREE: '商品分类树形',
+  PERMISSION_MANAGE: '权限管理',
+  ROLE_MANAGE: '角色管理',
+  SETTINGS_MANAGE: '设置管理',
+}
+
 function splitCode(code: string): string[] {
   if (code.includes(':')) return code.split(':').filter(Boolean)
   if (code.includes('.')) return code.split('.').filter(Boolean)
@@ -7,10 +42,15 @@ function splitCode(code: string): string[] {
   return [code]
 }
 
-function toTitle(segment: string): string {
-  if (!segment) return segment
-  if (segment === segment.toUpperCase()) return segment
-  return segment.slice(0, 1).toUpperCase() + segment.slice(1)
+function toChineseLabel(segment: string): string {
+  const normalized = segment.trim()
+  if (!normalized) return normalized
+  return CODE_LABELS[normalized.toLowerCase()] ?? FULL_CODE_LABELS[normalized] ?? normalized
+}
+
+function getPermissionLabel(permission: AdminPermission, segments: string[]): string {
+  if (permission.name && permission.name !== permission.code) return permission.name
+  return FULL_CODE_LABELS[permission.code] ?? segments.map(toChineseLabel).join('')
 }
 
 function createNode(id: string, label: string, code: string, depth: number): PermissionTreeNode {
@@ -22,6 +62,29 @@ function createNode(id: string, label: string, code: string, depth: number): Per
     children: [],
     permissionIds: [],
   }
+}
+
+export function isSuperAdminPermission(permission: AdminPermission): boolean {
+  const code = permission.code.trim().toLowerCase()
+  const name = permission.name.trim().toLowerCase()
+
+  return (
+    code === 'sub_admin' ||
+    code === 'sub:admin' ||
+    code === 'sub.admin' ||
+    code === 'subadmin' ||
+    code === 'super_admin' ||
+    code === 'super:admin' ||
+    code === 'super.admin' ||
+    code === 'superadmin' ||
+    permission.code === 'SUB_ADMIN' ||
+    permission.name.includes('超级管理员') ||
+    name.includes('super admin')
+  )
+}
+
+export function filterVisiblePermissions(permissions: AdminPermission[]): AdminPermission[] {
+  return permissions.filter((permission) => !isSuperAdminPermission(permission))
 }
 
 export function buildPermissionTree(permissions: AdminPermission[]): PermissionTreeNode[] {
@@ -42,14 +105,19 @@ export function buildPermissionTree(permissions: AdminPermission[]): PermissionT
       let node = nodeMap.get(nodeId)
 
       if (!node) {
-        node = createNode(nodeId, isLeaf ? permission.name : toTitle(segment), prefix, index)
+        node = createNode(
+          nodeId,
+          isLeaf ? getPermissionLabel(permission, segments) : toChineseLabel(segment),
+          prefix,
+          index,
+        )
         nodeMap.set(nodeId, node)
         parentList.push(node)
       }
 
       if (isLeaf) {
         node.permission = permission
-        node.label = permission.name
+        node.label = getPermissionLabel(permission, segments)
       }
 
       parentList = node.children

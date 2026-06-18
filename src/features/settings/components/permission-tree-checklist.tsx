@@ -1,6 +1,6 @@
 'use client'
 
-import { ChevronRight, Shield } from 'lucide-react'
+import { ChevronRight } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
@@ -21,72 +21,75 @@ function getCheckedState(node: PermissionTreeNode, selected: Set<number>) {
 
 interface PermissionCheckNodeProps {
   node: PermissionTreeNode
+  depth: number
   selected: Set<number>
   onToggle: (node: PermissionTreeNode) => void
 }
 
-function PermissionCheckNode({ node, selected, onToggle }: PermissionCheckNodeProps) {
+function PermissionCheckNode({ node, depth, selected, onToggle }: PermissionCheckNodeProps) {
   const hasChildren = node.children.length > 0
   const checked = getCheckedState(node, selected)
+  const indent = depth * 18
 
   return (
     <Collapsible defaultOpen>
-      <div className="rounded-2xl border border-border/60 bg-card/70 p-3">
-        <div className="flex items-start gap-3">
+      <div
+        className="group flex min-h-11 items-center gap-2 rounded-xl px-2 py-2 transition-colors hover:bg-muted/50"
+        style={{ paddingLeft: indent + 8 }}
+      >
+        {hasChildren ? (
+          <CollapsibleTrigger className="group/trigger flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-background hover:text-foreground">
+            <ChevronRight className="size-4 transition-transform group-data-[state=open]/trigger:rotate-90" />
+          </CollapsibleTrigger>
+        ) : (
+          <span className="size-7 shrink-0" />
+        )}
+
+        <label className="flex min-w-0 flex-1 cursor-pointer items-center gap-3">
+          <Checkbox
+            checked={checked}
+            onCheckedChange={() => onToggle(node)}
+          />
+          <span className="min-w-0 flex-1 truncate text-sm font-medium">{node.label}</span>
           {hasChildren ? (
-            <CollapsibleTrigger className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-              <ChevronRight className="size-4 transition-transform data-[state=open]:rotate-90" />
-            </CollapsibleTrigger>
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {node.permissionIds.length} 项
+            </span>
           ) : (
-            <div className="mt-0.5 flex size-7 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-              <Shield className="size-3.5 text-primary" />
-            </div>
+            <Badge variant="secondary" className="min-w-0 truncate font-mono text-[11px]">
+              {node.permission?.code ?? node.code}
+            </Badge>
           )}
-          <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-3">
-            <Checkbox
-              checked={checked}
-              onCheckedChange={() => onToggle(node)}
-              className="mt-1"
-            />
-            <div className="min-w-0 flex-1">
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-sm font-medium">{node.label}</span>
-                <Badge variant="secondary" className="font-mono text-[11px]">
-                  {node.permission?.code ?? node.code}
-                </Badge>
-              </div>
-              {hasChildren && (
-                <p className="mt-0.5 text-xs text-muted-foreground">
-                  {node.permissionIds.length} 个权限
-                </p>
-              )}
-            </div>
-          </label>
-        </div>
+        </label>
+      </div>
         {hasChildren && (
-          <CollapsibleContent className="mt-3 space-y-2 border-l border-border/60 pl-4">
+          <CollapsibleContent
+            className="relative space-y-1 before:absolute before:bottom-1 before:top-1 before:w-px before:bg-border/70"
+            style={{ marginLeft: indent + 21 }}
+          >
             {node.children.map((child) => (
               <PermissionCheckNode
                 key={child.id}
                 node={child}
+                depth={depth + 1}
                 selected={selected}
                 onToggle={onToggle}
               />
             ))}
           </CollapsibleContent>
         )}
-      </div>
     </Collapsible>
   )
 }
 
 export function PermissionTreeChecklist({ nodes, selected, onToggle }: PermissionTreeChecklistProps) {
   return (
-    <div className="space-y-2">
+    <div className="rounded-2xl border border-border/60 bg-card/80 p-2">
       {nodes.map((node) => (
         <PermissionCheckNode
           key={node.id}
           node={node}
+          depth={0}
           selected={selected}
           onToggle={onToggle}
         />

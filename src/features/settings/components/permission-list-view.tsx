@@ -1,15 +1,21 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Loader2, Shield } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Permissions } from '@/permissions/rbac'
 import { usePermissionList, useDeletePermission } from '../hooks/use-permissions'
 import { PermissionFormDialog } from './permission-form-dialog'
 import { PermissionTreeList } from './permission-tree-list'
-import { buildPermissionTree } from '../lib/permission-tree'
+import { buildPermissionTree, filterVisiblePermissions } from '../lib/permission-tree'
 import type { AdminPermission } from '../types'
+
+const PERMISSION_MANAGE_CODES = [
+  Permissions.PERMISSION_MANAGE,
+  Permissions.PERMISSION_MANAGE_LEGACY,
+] as const
 
 export function PermissionListView() {
   const { data: permissions, isLoading } = usePermissionList()
@@ -18,7 +24,8 @@ export function PermissionListView() {
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<AdminPermission | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AdminPermission | null>(null)
-  const tree = buildPermissionTree(permissions ?? [])
+  const visiblePermissions = filterVisiblePermissions(permissions ?? [])
+  const tree = buildPermissionTree(visiblePermissions)
 
   const handleEdit = (item: AdminPermission) => {
     setEditData(item)
@@ -44,7 +51,7 @@ export function PermissionListView() {
           <h1 className="text-2xl font-semibold">权限管理</h1>
           <p className="mt-1 text-sm text-muted-foreground">管理系统权限编码</p>
         </div>
-        <Button onClick={handleCreate}>
+        <Button onClick={handleCreate} permission={PERMISSION_MANAGE_CODES}>
           <Plus className="size-4" />
           新增权限
         </Button>
@@ -55,9 +62,8 @@ export function PermissionListView() {
         <div className="flex justify-center py-20">
           <Loader2 className="size-6 animate-spin text-muted-foreground" />
         </div>
-      ) : !permissions?.length ? (
-        <Card className="flex flex-col items-center justify-center py-20 rounded-2xl">
-          <Shield className="size-12 text-muted-foreground/30" />
+      ) : !visiblePermissions.length ? (
+        <Card className="flex flex-col items-center justify-center rounded-2xl py-20">
           <p className="mt-4 text-sm text-muted-foreground">暂无权限数据</p>
         </Card>
       ) : (
@@ -82,7 +88,12 @@ export function PermissionListView() {
           </DialogHeader>
           <div className="flex justify-end gap-3 pt-2">
             <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={deleteMutation.isPending}>
+            <Button
+              variant="destructive"
+              permission={PERMISSION_MANAGE_CODES}
+              onClick={handleDelete}
+              disabled={deleteMutation.isPending}
+            >
               {deleteMutation.isPending && <Loader2 className="size-4 animate-spin" />}
               删除
             </Button>

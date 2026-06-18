@@ -8,9 +8,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { Permissions } from '@/permissions/rbac'
 import { permissionSchema, type PermissionFormValues } from '../schemas/permission-schema'
 import { useCreatePermission, useUpdatePermission } from '../hooks/use-permissions'
 import type { AdminPermission } from '../types'
+
+const PERMISSION_MANAGE_CODES = [
+  Permissions.PERMISSION_MANAGE,
+  Permissions.PERMISSION_MANAGE_LEGACY,
+] as const
 
 interface Props {
   open: boolean
@@ -70,7 +76,7 @@ export function PermissionFormDialog({ open, onClose, editData }: Props) {
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>
               取消
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" permission={PERMISSION_MANAGE_CODES} disabled={loading}>
               {loading && <Loader2 className="size-4 animate-spin" />}
               {isEdit ? '保存' : '创建'}
             </Button>

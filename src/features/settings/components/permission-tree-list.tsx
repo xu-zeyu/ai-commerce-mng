@@ -1,10 +1,16 @@
 'use client'
 
-import { ChevronRight, Pencil, Shield, Trash2 } from 'lucide-react'
+import { ChevronRight, Pencil, Trash2 } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
+import { Permissions } from '@/permissions/rbac'
 import type { AdminPermission, PermissionTreeNode } from '../types'
+
+const PERMISSION_MANAGE_CODES = [
+  Permissions.PERMISSION_MANAGE,
+  Permissions.PERMISSION_MANAGE_LEGACY,
+] as const
 
 interface PermissionTreeListProps {
   nodes: PermissionTreeNode[]
@@ -14,77 +20,88 @@ interface PermissionTreeListProps {
 
 interface PermissionNodeRowProps {
   node: PermissionTreeNode
+  depth: number
   onEdit: (permission: AdminPermission) => void
   onDelete: (permission: AdminPermission) => void
 }
 
-function PermissionNodeRow({ node, onEdit, onDelete }: PermissionNodeRowProps) {
+function PermissionNodeRow({ node, depth, onEdit, onDelete }: PermissionNodeRowProps) {
   const hasChildren = node.children.length > 0
   const permission = node.permission
+  const indent = depth * 18
 
-  const content = (
-    <div className="flex min-w-0 flex-1 items-center gap-3">
-      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
-        <Shield className="size-4 text-primary" />
-      </div>
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <span className="font-medium">{node.label}</span>
-          <Badge variant="secondary" className="font-mono text-[11px]">
-            {permission?.code ?? node.code}
-          </Badge>
+  const row = (
+    <div
+      className="group flex min-h-12 items-center gap-2 rounded-xl px-2 py-2 transition-colors hover:bg-muted/50"
+      style={{ paddingLeft: indent + 8 }}
+    >
+      {hasChildren ? (
+        <CollapsibleTrigger className="group/trigger flex size-7 shrink-0 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-background hover:text-foreground">
+          <ChevronRight className="size-4 transition-transform group-data-[state=open]/trigger:rotate-90" />
+        </CollapsibleTrigger>
+      ) : (
+        <span className="size-7 shrink-0" />
+      )}
+
+      <div className="min-w-0 flex-1">
+        <div className="flex min-w-0 items-center gap-2">
+          <span className="truncate text-sm font-medium text-foreground">{node.label}</span>
+          {hasChildren ? (
+            <span className="shrink-0 text-xs text-muted-foreground">
+              {node.permissionIds.length} 项
+            </span>
+          ) : (
+            <Badge variant="secondary" className="min-w-0 truncate font-mono text-[11px]">
+              {permission?.code ?? node.code}
+            </Badge>
+          )}
         </div>
-        {hasChildren && (
-          <p className="mt-0.5 text-xs text-muted-foreground">
-            {node.permissionIds.length} 个权限
-          </p>
-        )}
       </div>
+
+      {permission && (
+        <div className="flex shrink-0 items-center gap-1 opacity-100 sm:opacity-0 sm:transition-opacity sm:group-hover:opacity-100">
+          <Button
+            variant="ghost"
+            size="icon"
+            permission={PERMISSION_MANAGE_CODES}
+            onClick={() => onEdit(permission)}
+            title="编辑权限"
+            className="size-8"
+          >
+            <Pencil className="size-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            permission={PERMISSION_MANAGE_CODES}
+            onClick={() => onDelete(permission)}
+            title="删除权限"
+            className="size-8"
+          >
+            <Trash2 className="size-4 text-destructive" />
+          </Button>
+        </div>
+      )}
     </div>
   )
 
   if (!hasChildren) {
-    return (
-      <div className="flex items-center justify-between rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm">
-        {content}
-        {permission && (
-          <div className="flex shrink-0 items-center gap-1">
-            <Button variant="ghost" size="icon" onClick={() => onEdit(permission)}>
-              <Pencil className="size-4" />
-            </Button>
-            <Button variant="ghost" size="icon" onClick={() => onDelete(permission)}>
-              <Trash2 className="size-4 text-destructive" />
-            </Button>
-          </div>
-        )}
-      </div>
-    )
+    return row
   }
 
   return (
     <Collapsible defaultOpen>
-      <div className="rounded-2xl border border-border/60 bg-card/70 p-3 shadow-sm">
-        <div className="flex items-center gap-2">
-          <CollapsibleTrigger className="flex size-8 shrink-0 items-center justify-center rounded-xl text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
-            <ChevronRight className="size-4 transition-transform data-[state=open]:rotate-90" />
-          </CollapsibleTrigger>
-          {content}
-          {permission && (
-            <div className="flex shrink-0 items-center gap-1">
-              <Button variant="ghost" size="icon" onClick={() => onEdit(permission)}>
-                <Pencil className="size-4" />
-              </Button>
-              <Button variant="ghost" size="icon" onClick={() => onDelete(permission)}>
-                <Trash2 className="size-4 text-destructive" />
-              </Button>
-            </div>
-          )}
-        </div>
-        <CollapsibleContent className="mt-3 space-y-2 border-l border-border/60 pl-4">
+      <div>
+        {row}
+        <CollapsibleContent
+          className="relative space-y-1 before:absolute before:bottom-1 before:top-1 before:w-px before:bg-border/70"
+          style={{ marginLeft: indent + 21 }}
+        >
           {node.children.map((child) => (
             <PermissionNodeRow
               key={child.id}
               node={child}
+              depth={depth + 1}
               onEdit={onEdit}
               onDelete={onDelete}
             />
@@ -97,11 +114,12 @@ function PermissionNodeRow({ node, onEdit, onDelete }: PermissionNodeRowProps) {
 
 export function PermissionTreeList({ nodes, onEdit, onDelete }: PermissionTreeListProps) {
   return (
-    <div className="grid gap-3">
+    <div className="rounded-2xl border border-border/60 bg-card/80 p-2 shadow-sm">
       {nodes.map((node) => (
         <PermissionNodeRow
           key={node.id}
           node={node}
+          depth={0}
           onEdit={onEdit}
           onDelete={onDelete}
         />

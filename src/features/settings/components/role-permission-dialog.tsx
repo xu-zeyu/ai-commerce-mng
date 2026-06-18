@@ -4,11 +4,17 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
+import { Permissions } from '@/permissions/rbac'
 import { usePermissionList } from '../hooks/use-permissions'
 import { useRolePermissions, useAssignRolePermissions } from '../hooks/use-roles'
-import { buildPermissionTree } from '../lib/permission-tree'
+import { buildPermissionTree, filterVisiblePermissions } from '../lib/permission-tree'
 import { PermissionTreeChecklist } from './permission-tree-checklist'
 import type { PermissionTreeNode } from '../types'
+
+const ROLE_MANAGE_CODES = [
+  Permissions.ROLE_MANAGE,
+  Permissions.ROLE_MANAGE_LEGACY,
+] as const
 
 interface Props {
   open: boolean
@@ -31,7 +37,8 @@ export function RolePermissionDialog({ open, onClose, roleId, roleName }: Props)
   }, [rolePermissions])
 
   const loading = loadingAll || loadingRole
-  const tree = buildPermissionTree(allPermissions ?? [])
+  const visiblePermissions = filterVisiblePermissions(allPermissions ?? [])
+  const tree = buildPermissionTree(visiblePermissions)
 
   const handleToggle = (node: PermissionTreeNode) => {
     setSelected((prev) => {
@@ -64,14 +71,18 @@ export function RolePermissionDialog({ open, onClose, roleId, roleName }: Props)
         ) : (
           <div className="flex-1 overflow-y-auto py-2">
             <PermissionTreeChecklist nodes={tree} selected={selected} onToggle={handleToggle} />
-            {!allPermissions?.length && (
+            {!visiblePermissions.length && (
               <p className="text-center text-sm text-muted-foreground py-6">暂无可分配的权限</p>
             )}
           </div>
         )}
         <div className="flex justify-end gap-3 pt-3 border-t">
           <Button variant="outline" onClick={onClose}>取消</Button>
-          <Button onClick={handleSave} disabled={assign.isPending || loading}>
+          <Button
+            permission={ROLE_MANAGE_CODES}
+            onClick={handleSave}
+            disabled={assign.isPending || loading}
+          >
             {assign.isPending && <Loader2 className="size-4 animate-spin" />}
             保存
           </Button>
