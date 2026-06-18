@@ -393,7 +393,7 @@ AI 必须：
 必须：
 
 - RBAC
-- middleware 权限控制
+- proxy 权限控制
 
 角色：
 

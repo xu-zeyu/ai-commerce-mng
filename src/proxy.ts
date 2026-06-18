@@ -1,10 +1,10 @@
-import { NextResponse, type NextRequest } from "next/server";
+import { NextResponse } from "next/server";
 
 /**
  * 客户端路由保护主要由 AuthProvider 负责。
  * 此处仅做基础的路径规范化。
  */
-export function middleware(request: NextRequest) {
+export function proxy() {
   return NextResponse.next();
 }
 

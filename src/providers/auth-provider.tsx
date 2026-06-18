@@ -4,11 +4,10 @@ import { useEffect, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { getAdminSelf } from "@/features/auth/api/get-admin-self";
-import { ApiError } from "@/services/api-client";
+import { isAxiosError } from "axios";
 import pageLoading from "@/assets/pageLoading.png";
 import Image from "next/image";
 
-/** 无需登录即可访问的路径 */
 const PUBLIC_PATHS = ["/login"];
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -18,9 +17,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const token = useAuthStore((s) => s.token);
   const user = useAuthStore((s) => s.user);
   const setUser = useAuthStore((s) => s.setUser);
-  const setToken = useAuthStore((s) => s.setToken);
   const logout = useAuthStore((s) => s.logout);
 
+  const [hydrated, setHydrated] = useState(false);
   const [ready, setReady] = useState(false);
 
   const isPublic = PUBLIC_PATHS.some(
@@ -28,11 +27,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
+    useAuthStore.persist.rehydrate();
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hydrated) return;
+
     let cancelled = false;
 
     async function checkAuth() {
       if (!token) {
-        // 无 token：公开页面放行，其他跳登录
         if (!isPublic) {
           router.replace("/login");
         }
@@ -40,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // 有 token 但没 user：尝试获取用户信息
       if (!user) {
         try {
           const self = await getAdminSelf();
@@ -48,16 +52,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
             setUser(self);
           }
         } catch (err) {
-          // token 过期或无效
-          if (err instanceof ApiError && (err.status === 401 || err.status === 403)) {
+          if (isAxiosError(err) && (err.response?.status === 401 || err.response?.status === 403)) {
             if (!cancelled) logout();
             if (!isPublic) router.replace("/login");
           }
-          // 网络错误时保留 token 和当前页面，让用户重试
         }
       }
 
-      // 已登录用户访问登录页 → 跳回首页
       if (!cancelled && isPublic && token) {
         router.replace("/");
       }
@@ -69,10 +70,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => {
       cancelled = true;
     };
-  }, [token, user, isPublic, router, setUser, logout]);
+  }, [hydrated, token, user, isPublic, router, setUser, logout]);
 
-  // 未就绪时显示加载页
-  if (!ready) {
+  if (!hydrated || !ready) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
@@ -90,13 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
   }
 
-  // 公开页面直接展示
-  if (isPublic) {
-    return <>{children}</>;
-  }
-
-  // 受保护页面但无 token → 不渲染（useEffect 已触发跳转）
-  if (!token) {
+  if (!isPublic && !token) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">

@@ -1,106 +1,107 @@
 'use client'
 
-import { useMemo } from 'react'
+import { useCallback } from 'react'
 import Image from 'next/image'
-import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { motion } from 'framer-motion'
+import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
-import { NAV_SECTIONS } from './nav-config'
+import { TooltipProvider } from '@/components/ui/tooltip'
+import { useFilteredNav } from '@/hooks/use-filtered-nav'
+import { useSidebarStore } from '@/stores/use-sidebar-store'
+import { NavItem } from './nav-item'
 import { ThemeSwitcher } from './theme-switcher'
 import { ThemeColorSwitcher } from './theme-color-switcher'
-import { cn } from '@/lib/utils'
 import logo from '@/assets/logo.png'
 
 interface Props {
   onNavigate?: () => void
+  forceExpanded?: boolean
 }
 
-export function Sidebar({ onNavigate }: Props) {
+export function Sidebar({ onNavigate, forceExpanded }: Props) {
   const pathname = usePathname()
+  const sections = useFilteredNav()
+  const collapsed = useSidebarStore((s) => s.collapsed)
+  const toggle = useSidebarStore((s) => s.toggle)
 
-  const activeHref = useMemo(() => {
-    let best = ''
-    for (const section of NAV_SECTIONS) {
-      for (const item of section.items) {
-        const matched =
-          pathname === item.href || (item.href !== '/' && pathname.startsWith(`${item.href}/`))
-        if (matched && item.href.length > best.length) best = item.href
-      }
-    }
-    return best
-  }, [pathname])
+  const isCollapsed = forceExpanded ? false : collapsed
+
+  const isActive = useCallback(
+    (href: string) =>
+      pathname === href || (href !== '/' && pathname.startsWith(`${href}/`)),
+    [pathname],
+  )
 
   return (
-    <div className="flex h-full flex-col">
-      {/* Logo 区域 */}
-      <div className="px-4 py-5">
-        <div className="flex items-center gap-3">
-          <div className="relative">
-            <Image src={logo} alt="金晗跨境" width={36} height={36} className="rounded-xl shadow-sm" />
-          </div>
-          <div className="leading-tight">
-            <div className="text-base font-semibold">金晗跨境</div>
-            <div className="text-xs text-muted-foreground">电商管理后台</div>
+    <TooltipProvider>
+      <div className="flex h-full flex-col" onClick={onNavigate}>
+        {/* Logo */}
+        <div className={`px-4 py-5 ${isCollapsed ? 'flex justify-center' : ''}`}>
+          <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
+            <Image src={logo} alt="金晗跨境" width={36} height={36} className="rounded-xl shadow-sm shrink-0" />
+            {!isCollapsed && (
+              <div className="leading-tight">
+                <div className="text-base font-semibold">金晗跨境</div>
+                <div className="text-xs text-muted-foreground">电商管理后台</div>
+              </div>
+            )}
           </div>
         </div>
-      </div>
 
-      <Separator />
+        <Separator />
 
-      {/* 导航区域 */}
-      <ScrollArea className="flex-1 px-3 py-4">
-        <nav className="space-y-6">
-          {NAV_SECTIONS.map((section) => (
-            <div key={section.label} className="space-y-2">
-              <div className="px-2 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
-                {section.label}
+        {/* Navigation */}
+        <ScrollArea className="flex-1 px-2 py-4">
+          <nav className="space-y-6">
+            {sections.map((section) => (
+              <div key={section.label} className="space-y-1.5">
+                {!isCollapsed && (
+                  <div className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                    {section.label}
+                  </div>
+                )}
+                <div className="space-y-0.5">
+                  {section.items.map((item) => (
+                    <NavItem
+                      key={item.href}
+                      item={item}
+                      collapsed={isCollapsed}
+                      isActive={isActive}
+                    />
+                  ))}
+                </div>
               </div>
-              <ul className="space-y-1">
-                {section.items.map((item) => {
-                  const active = item.href === activeHref
-                  return (
-                    <li key={item.href}>
-                      <Link
-                        href={item.href}
-                        onClick={onNavigate}
-                        className={cn(
-                          'group relative flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-all duration-200',
-                          active
-                            ? 'bg-primary/10 text-primary'
-                            : 'text-foreground/60 hover:bg-muted/60 hover:text-foreground',
-                        )}
-                      >
-                        {active && (
-                          <motion.span
-                            layoutId="sidebar-active"
-                            className="absolute inset-y-1.5 left-0 w-1 rounded-r-full bg-primary"
-                            transition={{ type: 'spring', stiffness: 400, damping: 32 }}
-                          />
-                        )}
-                        <item.icon className="size-4 shrink-0" />
-                        <span className="flex-1 truncate">{item.label}</span>
-                      </Link>
-                    </li>
-                  )
-                })}
-              </ul>
-            </div>
-          ))}
-        </nav>
-      </ScrollArea>
+            ))}
+          </nav>
+        </ScrollArea>
 
-      {/* 底部设置区 */}
-      <Separator />
-      <div className="space-y-3 px-4 py-3">
-        <ThemeColorSwitcher />
-        <ThemeSwitcher />
+        {/* Bottom */}
+        {!isCollapsed && (
+          <>
+            <Separator />
+            <div className="space-y-3 px-4 py-3">
+              <ThemeColorSwitcher />
+              <ThemeSwitcher />
+            </div>
+          </>
+        )}
+
+        <Separator />
+        <div className={`flex items-center px-3 py-3 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
+          {!isCollapsed && (
+            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} 金晗跨境</span>
+          )}
+          {!forceExpanded && (
+            <button
+              onClick={(e) => { e.stopPropagation(); toggle() }}
+              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+            >
+              {isCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+            </button>
+          )}
+        </div>
       </div>
-      <Separator />
-      <div className="px-4 py-3 text-xs text-muted-foreground">
-        © {new Date().getFullYear()} 金晗跨境电商
-      </div>
-    </div>
+    </TooltipProvider>
   )
 }

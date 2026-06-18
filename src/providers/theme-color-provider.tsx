@@ -10,8 +10,12 @@ function applyColor(color: string) {
 
 export function ThemeColorProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
-    void useThemeColorStore.persist.rehydrate()
-    applyColor(useThemeColorStore.getState().color)
+    const result = useThemeColorStore.persist.rehydrate()
+    if (result && 'then' in result) {
+      result.then(() => applyColor(useThemeColorStore.getState().color))
+    } else {
+      applyColor(useThemeColorStore.getState().color)
+    }
     const unsub = useThemeColorStore.subscribe((state) => applyColor(state.color))
     return () => unsub()
   }, [])

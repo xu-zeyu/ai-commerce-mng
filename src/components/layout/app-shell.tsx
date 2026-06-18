@@ -4,11 +4,13 @@ import { useState, type ReactNode } from 'react'
 import { Menu } from 'lucide-react'
 import { Sheet, SheetContent, SheetDescription, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/button'
+import { useSidebarStore } from '@/stores/use-sidebar-store'
 import { Sidebar } from './sidebar'
 import { Topbar } from './topbar'
 
 export function AppShell({ children }: { children: ReactNode }) {
   const [mobileOpen, setMobileOpen] = useState(false)
+  const collapsed = useSidebarStore((s) => s.collapsed)
 
   return (
     <div className="relative flex h-screen overflow-hidden bg-background">
@@ -19,8 +21,12 @@ export function AppShell({ children }: { children: ReactNode }) {
       </div>
 
       {/* 桌面端玻璃侧边栏 */}
-      <aside className="z-20 hidden h-screen shrink-0 p-3 lg:flex lg:flex-col">
-        <div className="flex h-full w-64 flex-col overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-lg backdrop-blur-xl supports-[backdrop-filter]:bg-card/50">
+      <aside className="z-20 hidden h-screen shrink-0 p-3 lg:flex lg:flex-col transition-all duration-300">
+        <div
+          className={`flex h-full flex-col overflow-hidden rounded-3xl border border-border/60 bg-card/70 shadow-lg backdrop-blur-xl supports-[backdrop-filter]:bg-card/50 transition-all duration-300 ${
+            collapsed ? 'w-[72px]' : 'w-64'
+          }`}
+        >
           <Sidebar />
         </div>
       </aside>
@@ -39,7 +45,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <SheetContent side="left" className="w-72 p-0">
                 <SheetTitle className="sr-only">导航菜单</SheetTitle>
                 <SheetDescription className="sr-only">侧边栏导航</SheetDescription>
-                <Sidebar onNavigate={() => setMobileOpen(false)} />
+                <Sidebar onNavigate={() => setMobileOpen(false)} forceExpanded />
               </SheetContent>
             </Sheet>
             <Topbar />

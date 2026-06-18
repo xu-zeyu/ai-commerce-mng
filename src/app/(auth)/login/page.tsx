@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ArrowRight, Smartphone, User as UserIcon } from "lucide-react";
+import { Loader2, ArrowRight, Lock, ShieldCheck, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,7 @@ import { Label } from "@/components/ui/label";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/login-schema";
 import { getCaptcha } from "@/features/auth/api/get-captcha";
-import { smsLogin } from "@/features/auth/api/login";
+import { login } from "@/features/auth/api/login";
 import { getAdminSelf } from "@/features/auth/api/get-admin-self";
 import logo from "@/assets/logo.png";
 
@@ -23,9 +23,10 @@ export default function LoginPage() {
   const setToken = useAuthStore((s) => s.setToken);
   const setUser = useAuthStore((s) => s.setUser);
 
-  const [captchaLoading, setCaptchaLoading] = useState(false);
-  const [captchaSent, setCaptchaSent] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [captchaLoading, setCaptchaLoading] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const {
     register,
@@ -35,10 +36,28 @@ export default function LoginPage() {
     formState: { errors, isSubmitting },
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
-    defaultValues: { username: "", code: "" },
+    defaultValues: { username: "", password: "", smsCode: "" },
   });
 
-  /** 获取验证码 */
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearInterval(timerRef.current);
+    };
+  }, []);
+
+  const startCountdown = useCallback(() => {
+    setCountdown(60);
+    timerRef.current = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          if (timerRef.current) clearInterval(timerRef.current);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+  }, []);
+
   const handleGetCaptcha = async () => {
     const valid = await trigger("username");
     if (!valid) return;
@@ -47,7 +66,7 @@ export default function LoginPage() {
     setCaptchaLoading(true);
     try {
       await getCaptcha(getValues("username"));
-      setCaptchaSent(true);
+      startCountdown();
     } catch (err) {
       const message =
         err instanceof Error ? err.message : "验证码发送失败，请稍后重试";
@@ -57,27 +76,24 @@ export default function LoginPage() {
     }
   };
 
-  /** 登录提交 */
   const onSubmit = async (values: LoginFormValues) => {
     setServerError(null);
     try {
-      // 1. 短信登录获取 token
-      const token = await smsLogin({
+      const token = await login({
         username: values.username,
-        code: values.code,
+        password: values.password,
+        smsCode: values.smsCode,
       });
 
       setToken(token);
 
-      // 2. 获取当前用户信息
       const user = await getAdminSelf();
       setUser(user);
 
-      // 3. 跳转首页
       router.push("/");
     } catch (err) {
       const message =
-        err instanceof Error ? err.message : "登录失败，请检查用户名和验证码";
+        err instanceof Error ? err.message : "登录失败，请检查用户名和密码";
       setServerError(message);
     }
   };
@@ -100,7 +116,7 @@ export default function LoginPage() {
           />
           <h1 className="mt-4 text-xl font-semibold">金晗跨境管理后台</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            使用短信验证码登录
+            请输入账号密码登录
           </p>
         </div>
 
@@ -138,42 +154,58 @@ export default function LoginPage() {
             )}
           </div>
 
-          {/* 验证码 */}
+          {/* 密码 */}
           <div className="space-y-2">
-            <Label htmlFor="code">短信验证码</Label>
+            <Label htmlFor="password">密码</Label>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50" />
+              <Input
+                id="password"
+                type="password"
+                placeholder="请输入密码"
+                className="pl-10"
+                disabled={isSubmitting}
+                {...register("password")}
+              />
+            </div>
+            {errors.password && (
+              <p className="text-xs text-destructive">{errors.password.message}</p>
+            )}
+          </div>
+
+          {/* 短信验证码 */}
+          <div className="space-y-2">
+            <Label htmlFor="smsCode">短信验证码</Label>
             <div className="flex gap-3">
               <div className="relative flex-1">
-                <Smartphone className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50" />
+                <ShieldCheck className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50" />
                 <Input
-                  id="code"
+                  id="smsCode"
                   placeholder="请输入验证码"
                   className="pl-10"
                   maxLength={6}
                   disabled={isSubmitting}
-                  {...register("code")}
+                  {...register("smsCode")}
                 />
               </div>
               <Button
                 type="button"
                 variant="outline"
                 className="shrink-0"
-                disabled={captchaLoading || isSubmitting}
+                disabled={captchaLoading || countdown > 0 || isSubmitting}
                 onClick={handleGetCaptcha}
               >
                 {captchaLoading ? (
-                  <>
-                    <Loader2 className="size-3.5 animate-spin" />
-                    发送中
-                  </>
-                ) : captchaSent ? (
-                  "重新发送"
+                  <Loader2 className="size-3.5 animate-spin" />
+                ) : countdown > 0 ? (
+                  `${countdown}s`
                 ) : (
                   "获取验证码"
                 )}
               </Button>
             </div>
-            {errors.code && (
-              <p className="text-xs text-destructive">{errors.code.message}</p>
+            {errors.smsCode && (
+              <p className="text-xs text-destructive">{errors.smsCode.message}</p>
             )}
           </div>
 
