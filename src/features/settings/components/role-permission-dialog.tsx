@@ -4,9 +4,11 @@ import { useEffect, useState } from 'react'
 import { Loader2 } from 'lucide-react'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
 import { usePermissionList } from '../hooks/use-permissions'
 import { useRolePermissions, useAssignRolePermissions } from '../hooks/use-roles'
+import { buildPermissionTree } from '../lib/permission-tree'
+import { PermissionTreeChecklist } from './permission-tree-checklist'
+import type { PermissionTreeNode } from '../types'
 
 interface Props {
   open: boolean
@@ -29,12 +31,16 @@ export function RolePermissionDialog({ open, onClose, roleId, roleName }: Props)
   }, [rolePermissions])
 
   const loading = loadingAll || loadingRole
+  const tree = buildPermissionTree(allPermissions ?? [])
 
-  const handleToggle = (id: number) => {
+  const handleToggle = (node: PermissionTreeNode) => {
     setSelected((prev) => {
       const next = new Set(prev)
-      if (next.has(id)) next.delete(id)
-      else next.add(id)
+      const allSelected = node.permissionIds.every((id) => next.has(id))
+      node.permissionIds.forEach((id) => {
+        if (allSelected) next.delete(id)
+        else next.add(id)
+      })
       return next
     })
   }
@@ -56,22 +62,8 @@ export function RolePermissionDialog({ open, onClose, roleId, roleName }: Props)
             <Loader2 className="size-5 animate-spin text-muted-foreground" />
           </div>
         ) : (
-          <div className="flex-1 overflow-y-auto space-y-2 py-2">
-            {allPermissions?.map((p) => (
-              <label
-                key={p.id}
-                className="flex items-center gap-3 rounded-xl px-3 py-2.5 hover:bg-muted/50 cursor-pointer transition-colors"
-              >
-                <Checkbox
-                  checked={selected.has(p.id)}
-                  onCheckedChange={() => handleToggle(p.id)}
-                />
-                <div className="flex-1">
-                  <span className="text-sm font-medium">{p.name}</span>
-                  <span className="ml-2 text-xs text-muted-foreground font-mono">{p.code}</span>
-                </div>
-              </label>
-            ))}
+          <div className="flex-1 overflow-y-auto py-2">
+            <PermissionTreeChecklist nodes={tree} selected={selected} onToggle={handleToggle} />
             {!allPermissions?.length && (
               <p className="text-center text-sm text-muted-foreground py-6">暂无可分配的权限</p>
             )}

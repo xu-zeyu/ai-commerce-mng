@@ -3,6 +3,22 @@
 import { useMemo } from 'react'
 import { useAuthStore } from '@/stores/use-auth-store'
 import { NAV_SECTIONS, type NavSection, type NavItem } from '@/components/layout/nav-config'
+import { hasPermission } from '@/permissions/rbac'
+
+function filterItem<T extends NavItem>(item: T, authorities: string[]): T | null {
+  if (item.permission && !hasPermission(authorities, item.permission)) {
+    return null
+  }
+
+  if (!item.children) return item
+
+  const children = item.children
+    .map((child) => filterItem(child as NavItem, authorities))
+    .filter(Boolean) as T['children']
+
+  if (!children?.length) return null
+  return { ...item, children }
+}
 
 export function useFilteredNav(): NavSection[] {
   const authorities = useAuthStore((s) => s.user?.authorities ?? [])
@@ -11,19 +27,7 @@ export function useFilteredNav(): NavSection[] {
     return NAV_SECTIONS.map((section) => ({
       ...section,
       items: section.items
-        .map((item) => {
-          if (item.permission && !authorities.includes(item.permission)) {
-            return null
-          }
-          if (item.children) {
-            const filtered = item.children.filter(
-              (child) => !child.permission || authorities.includes(child.permission),
-            )
-            if (filtered.length === 0) return null
-            return { ...item, children: filtered }
-          }
-          return item
-        })
+        .map((item) => filterItem(item, authorities))
         .filter(Boolean) as NavItem[],
     })).filter((section) => section.items.length > 0)
   }, [authorities])

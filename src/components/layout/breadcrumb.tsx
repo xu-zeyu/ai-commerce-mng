@@ -2,7 +2,20 @@
 
 import { usePathname } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
-import { NAV_SECTIONS } from './nav-config'
+import { NAV_SECTIONS, type NavChildItem, type NavItem } from './nav-config'
+
+function findTrail(items: Array<NavItem | NavChildItem>, pathname: string): string[] {
+  for (const item of items) {
+    const exact = pathname === item.href
+    const prefix = item.href !== '/' && pathname.startsWith(`${item.href}/`)
+    const childTrail = item.children ? findTrail(item.children, pathname) : []
+
+    if (childTrail.length > 0) return [item.label, ...childTrail]
+    if (exact || prefix) return [item.label]
+  }
+
+  return []
+}
 
 export function Breadcrumb() {
   const pathname = usePathname()
@@ -10,25 +23,8 @@ export function Breadcrumb() {
   const trail: string[] = []
 
   for (const section of NAV_SECTIONS) {
-    for (const item of section.items) {
-      const exactItem = pathname === item.href
-      const prefixItem = item.href !== '/' && pathname.startsWith(`${item.href}/`)
-
-      if (item.children) {
-        for (const child of item.children) {
-          if (pathname === child.href) {
-            trail.push(section.label, item.label, child.label)
-            break
-          }
-        }
-        if (trail.length > 0) break
-      }
-
-      if (exactItem || prefixItem) {
-        trail.push(section.label, item.label)
-        break
-      }
-    }
+    const sectionTrail = findTrail(section.items, pathname)
+    if (sectionTrail.length > 0) trail.push(section.label, ...sectionTrail)
     if (trail.length > 0) break
   }
 

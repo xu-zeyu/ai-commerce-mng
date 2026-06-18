@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Pencil, Trash2, Loader2, Shield } from 'lucide-react'
+import { Plus, Loader2, Shield } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
 import { usePermissionList, useDeletePermission } from '../hooks/use-permissions'
 import { PermissionFormDialog } from './permission-form-dialog'
+import { PermissionTreeList } from './permission-tree-list'
+import { buildPermissionTree } from '../lib/permission-tree'
 import type { AdminPermission } from '../types'
 
 export function PermissionListView() {
@@ -17,6 +18,7 @@ export function PermissionListView() {
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<AdminPermission | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AdminPermission | null>(null)
+  const tree = buildPermissionTree(permissions ?? [])
 
   const handleEdit = (item: AdminPermission) => {
     setEditData(item)
@@ -59,31 +61,11 @@ export function PermissionListView() {
           <p className="mt-4 text-sm text-muted-foreground">暂无权限数据</p>
         </Card>
       ) : (
-        <div className="grid gap-3">
-          {permissions.map((item) => (
-            <Card key={item.id} className="flex items-center justify-between p-4 rounded-2xl">
-              <div className="flex items-center gap-4">
-                <div className="flex size-10 items-center justify-center rounded-xl bg-primary/10">
-                  <Shield className="size-5 text-primary" />
-                </div>
-                <div>
-                  <div className="font-medium">{item.name}</div>
-                  <Badge variant="secondary" className="mt-1 font-mono text-xs">
-                    {item.code}
-                  </Badge>
-                </div>
-              </div>
-              <div className="flex items-center gap-1">
-                <Button variant="ghost" size="icon" onClick={() => handleEdit(item)}>
-                  <Pencil className="size-4" />
-                </Button>
-                <Button variant="ghost" size="icon" onClick={() => setDeleteTarget(item)}>
-                  <Trash2 className="size-4 text-destructive" />
-                </Button>
-              </div>
-            </Card>
-          ))}
-        </div>
+        <PermissionTreeList
+          nodes={tree}
+          onEdit={handleEdit}
+          onDelete={setDeleteTarget}
+        />
       )}
 
       {/* Form Dialog */}

@@ -9,9 +9,11 @@
  */
 export const Permissions = {
   DASHBOARD_VIEW: "dashboard:view",
-  SUB_ADMIN: "sub:admin",
+  SUB_ADMIN: "SUB_ADMIN",
   PERMISSION_MANAGE: "permission:manage",
+  PERMISSION_MANAGE_LEGACY: "PERMISSION_MANAGE",
   ROLE_MANAGE: "role:manage",
+  ROLE_MANAGE_LEGACY: "ROLE_MANAGE",
   PRODUCT_VIEW: "product:view",
   PRODUCT_MANAGE: "product:manage",
   ORDER_VIEW: "order:view",
@@ -21,9 +23,20 @@ export const Permissions = {
   CATEGORY_VIEW: "category:view",
   CATEGORY_MANAGE: "category:manage",
   SETTINGS_MANAGE: "settings:manage",
+  SETTINGS_MANAGE_LEGACY: "SETTINGS_MANAGE",
 } as const;
 
-export type PermissionCode = string;
+export type PermissionCode = string | readonly string[];
+
+const SUPER_ADMIN_CODES = new Set<string>([Permissions.SUB_ADMIN, "sub:admin"]);
+
+export function isSuperAdmin(authorities: string[]): boolean {
+  return authorities.some((code) => SUPER_ADMIN_CODES.has(code));
+}
+
+function matchesPermission(authorities: string[], permission: string): boolean {
+  return authorities.includes(permission);
+}
 
 /**
  * 检查权限列表是否包含指定权限。
@@ -32,7 +45,11 @@ export function hasPermission(
   authorities: string[],
   permission: PermissionCode,
 ): boolean {
-  return authorities.includes(permission);
+  if (isSuperAdmin(authorities)) return true;
+  if (typeof permission !== "string") {
+    return permission.some((code) => matchesPermission(authorities, code));
+  }
+  return matchesPermission(authorities, permission);
 }
 
 /**
@@ -42,7 +59,7 @@ export function hasAnyPermission(
   authorities: string[],
   permissions: PermissionCode[],
 ): boolean {
-  return permissions.some((p) => authorities.includes(p));
+  return permissions.some((p) => hasPermission(authorities, p));
 }
 
 /**
@@ -52,5 +69,5 @@ export function hasAllPermissions(
   authorities: string[],
   permissions: PermissionCode[],
 ): boolean {
-  return permissions.every((p) => authorities.includes(p));
+  return permissions.every((p) => hasPermission(authorities, p));
 }

@@ -1,23 +1,23 @@
 import {
   LayoutDashboard,
   Settings,
-  Shield,
-  Users,
   type LucideIcon,
 } from 'lucide-react'
-import { Permissions } from '@/permissions/rbac'
+import { Permissions, type PermissionCode } from '@/permissions/rbac'
 
 export interface NavChildItem {
   label: string
   href: string
-  permission?: string
+  icon?: LucideIcon
+  permission?: PermissionCode
+  children?: NavChildItem[]
 }
 
 export interface NavItem {
   label: string
   href: string
   icon: LucideIcon
-  permission?: string
+  permission?: PermissionCode
   children?: NavChildItem[]
 }
 
@@ -40,10 +40,17 @@ export const NAV_SECTIONS: NavSection[] = [
         label: '设置',
         href: '/settings',
         icon: Settings,
-        permission: Permissions.SETTINGS_MANAGE,
         children: [
-          { label: '权限管理', href: '/settings/permissions', permission: Permissions.PERMISSION_MANAGE },
-          { label: '角色管理', href: '/settings/roles', permission: Permissions.ROLE_MANAGE },
+          {
+            label: '权限管理',
+            href: '/settings/permissions',
+            permission: [Permissions.PERMISSION_MANAGE, Permissions.PERMISSION_MANAGE_LEGACY],
+          },
+          {
+            label: '角色管理',
+            href: '/settings/roles',
+            permission: [Permissions.ROLE_MANAGE, Permissions.ROLE_MANAGE_LEGACY],
+          },
         ],
       },
     ],

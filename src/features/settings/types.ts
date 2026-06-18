@@ -4,10 +4,20 @@ export interface AdminPermission {
   code: string
 }
 
+export interface PermissionTreeNode {
+  id: string
+  label: string
+  code: string
+  depth: number
+  children: PermissionTreeNode[]
+  permissionIds: number[]
+  permission?: AdminPermission
+}
+
 export interface AdminRole {
   id: number
   rname: string
-  description: string
-  updatedTime: string
-  createdTime: string
+  description?: string | null
+  updatedTime?: string
+  createdTime?: string
 }

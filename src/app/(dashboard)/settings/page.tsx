@@ -1,5 +1,5 @@
-import { redirect } from 'next/navigation'
+import { SettingsIndexView } from '@/features/settings/components/settings-index-view'
 
 export default function SettingsPage() {
-  redirect('/settings/permissions')
+  return <SettingsIndexView />
 }
