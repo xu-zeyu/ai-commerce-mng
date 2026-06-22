@@ -1,4 +1,5 @@
 import {
+  FolderTree,
   LayoutDashboard,
   Settings,
   type LucideIcon,
@@ -31,6 +32,23 @@ export const NAV_SECTIONS: NavSection[] = [
     label: '运营',
     items: [
       { label: '概览', href: '/', icon: LayoutDashboard },
+      {
+        label: '商品管理',
+        href: '/goods',
+        icon: FolderTree,
+        children: [
+          {
+            label: '商品分类',
+            href: '/goods/category',
+            permission: [
+              Permissions.CATEGORY_VIEW,
+              Permissions.CATEGORY_MANAGE,
+              'GOODS_CATEGORY_PAGE',
+              'GOODS_CATEGORY_TREE',
+            ],
+          },
+        ],
+      },
     ],
   },
   {

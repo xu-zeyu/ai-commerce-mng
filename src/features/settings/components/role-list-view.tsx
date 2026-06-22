@@ -1,7 +1,7 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { CloudUpload, Plus, ShieldCheck } from 'lucide-react'
+import { CloudUpload, Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
@@ -96,18 +96,6 @@ export function RoleListView() {
 
   return (
     <div className="space-y-6">
-      <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-primary/10">
-            <ShieldCheck className="size-5 text-primary" />
-          </span>
-          <div>
-            <h1 className="text-xl font-semibold">角色管理</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">管理系统角色、同步权限定义并分配角色权限</p>
-          </div>
-        </div>
-      </div>
-
       <Card className="overflow-hidden border-border/60">
         <DataTableToolbar
           searchValue={keyword}

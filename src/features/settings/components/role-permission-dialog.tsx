@@ -11,7 +11,7 @@ import { useRolePermissions, useAssignRolePermissions } from '../hooks/use-roles
 import {
   buildRolePermissionTree,
   convertCheckedCodesToPermissionIds,
-  getAssignedActionCodes,
+  getAssignedPermissionCodes,
 } from '../lib/admin-permissions'
 import { PermissionTreeChecklist } from './permission-tree-checklist'
 import type { AdminPermission, RolePermissionTreeNode } from '../types'
@@ -96,7 +96,7 @@ export function RolePermissionDialog({ open, onClose, roleId, roleName }: Props)
 
   const loading = loadingAll || loadingRole
   const tree = buildRolePermissionTree()
-  const initialSelectedCodes = rolePermissions ? getAssignedActionCodes(rolePermissions) : []
+  const initialSelectedCodes = rolePermissions ? getAssignedPermissionCodes(rolePermissions) : []
   const editorKey = `${roleId ?? 'empty'}:${initialSelectedCodes.join(',')}`
   const canEdit = roleId !== null && !loading
 

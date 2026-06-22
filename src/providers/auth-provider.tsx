@@ -27,15 +27,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    if (useAuthStore.persist.hasHydrated()) {
-      setHydrated(true);
+    const persist = useAuthStore.persist;
+
+    if (persist?.hasHydrated()) {
+      queueMicrotask(() => setHydrated(true));
       return;
     }
 
-    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+    const unsubscribe = persist?.onFinishHydration(() => {
       setHydrated(true);
     });
-    void Promise.resolve(useAuthStore.persist.rehydrate()).finally(() => {
+    void Promise.resolve(persist?.rehydrate()).finally(() => {
       setHydrated(true);
     });
     return unsubscribe;

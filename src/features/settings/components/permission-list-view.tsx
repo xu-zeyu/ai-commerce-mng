@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { Plus, Loader2, KeyRound } from 'lucide-react'
+import { Plus, Loader2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
@@ -45,17 +45,8 @@ export function PermissionListView() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex size-10 items-center justify-center rounded-2xl bg-primary/10">
-            <KeyRound className="size-5 text-primary" />
-          </span>
-          <div>
-            <h1 className="text-xl font-semibold">权限管理</h1>
-            <p className="mt-0.5 text-sm text-muted-foreground">管理系统权限编码与层级结构</p>
-          </div>
-        </div>
+      {/* Toolbar */}
+      <div className="flex justify-end">
         <Button onClick={handleCreate} permission={PERMISSION_MANAGE_CODES}>
           <Plus className="size-4" />
           新增权限
