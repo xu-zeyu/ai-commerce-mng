@@ -1,17 +1,16 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Check } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { useThemeColorStore } from '@/stores/use-theme-color-store'
 import { DEFAULT_THEME_COLOR, THEME_COLORS, type ThemeColorKey } from '@/styles/theme-colors'
 import { cn } from '@/lib/utils'
+import { useMounted } from '@/hooks/use-mounted'
 
 export function ThemeColorSwitcher() {
   const color = useThemeColorStore((s) => s.color)
   const setColor = useThemeColorStore((s) => s.setColor)
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useMounted()
 
   const active: ThemeColorKey = mounted ? color : DEFAULT_THEME_COLOR
 

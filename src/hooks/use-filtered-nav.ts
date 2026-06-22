@@ -3,9 +3,9 @@
 import { useMemo } from 'react'
 import { useAuthStore } from '@/stores/use-auth-store'
 import { NAV_SECTIONS, type NavSection, type NavItem } from '@/components/layout/nav-config'
-import { hasPermission } from '@/permissions/rbac'
+import { EMPTY_AUTHORITIES, hasPermission } from '@/permissions/rbac'
 
-function filterItem<T extends NavItem>(item: T, authorities: string[]): T | null {
+function filterItem<T extends NavItem>(item: T, authorities: readonly string[]): T | null {
   if (item.permission && !hasPermission(authorities, item.permission)) {
     return null
   }
@@ -21,7 +21,7 @@ function filterItem<T extends NavItem>(item: T, authorities: string[]): T | null
 }
 
 export function useFilteredNav(): NavSection[] {
-  const authorities = useAuthStore((s) => s.user?.authorities ?? [])
+  const authorities = useAuthStore((s) => s.user?.authorities ?? EMPTY_AUTHORITIES)
 
   return useMemo(() => {
     return NAV_SECTIONS.map((section) => ({

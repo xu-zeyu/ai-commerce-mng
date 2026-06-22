@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo, useState } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { ChevronRight } from 'lucide-react'
@@ -35,13 +35,10 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
   const active = isActive(item.href)
   const childActive = hasActiveChild(item, pathname)
   const [open, setOpen] = useState(active || childActive)
+  const displayOpen = open || active || childActive
   const leafHref = useMemo(() => findFirstLeaf(item), [item])
 
   const Icon = item.icon
-
-  useEffect(() => {
-    if (active || childActive) setOpen(true)
-  }, [active, childActive])
 
   if (collapsed) {
     return (
@@ -82,7 +79,7 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
   }
 
   return (
-    <Collapsible open={open} onOpenChange={setOpen}>
+    <Collapsible open={displayOpen} onOpenChange={setOpen}>
       <CollapsibleTrigger
         className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground ${
           active || childActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground'

@@ -8,7 +8,7 @@
     "build:test": "NEXT_PUBLIC_APP_ENV=test NEXT_PUBLIC_API_BASE_URL=http://8.163.103.108/ next build",
     "build:prod": "NEXT_PUBLIC_APP_ENV=prod next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {

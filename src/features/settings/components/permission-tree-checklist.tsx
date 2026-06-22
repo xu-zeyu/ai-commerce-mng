@@ -4,26 +4,26 @@ import { ChevronRight } from 'lucide-react'
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible'
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
-import type { PermissionTreeNode } from '../types'
+import type { RolePermissionTreeNode } from '../types'
 
 interface PermissionTreeChecklistProps {
-  nodes: PermissionTreeNode[]
-  selected: Set<number>
-  onToggle: (node: PermissionTreeNode) => void
+  nodes: RolePermissionTreeNode[]
+  selected: Set<string>
+  onToggle: (node: RolePermissionTreeNode) => void
 }
 
-function getCheckedState(node: PermissionTreeNode, selected: Set<number>) {
-  const selectedCount = node.permissionIds.filter((id) => selected.has(id)).length
+function getCheckedState(node: RolePermissionTreeNode, selected: Set<string>) {
+  const selectedCount = node.permissionCodes.filter((code) => selected.has(code)).length
   if (selectedCount === 0) return false
-  if (selectedCount === node.permissionIds.length) return true
+  if (selectedCount === node.permissionCodes.length) return true
   return 'indeterminate'
 }
 
 interface PermissionCheckNodeProps {
-  node: PermissionTreeNode
+  node: RolePermissionTreeNode
   depth: number
-  selected: Set<number>
-  onToggle: (node: PermissionTreeNode) => void
+  selected: Set<string>
+  onToggle: (node: RolePermissionTreeNode) => void
 }
 
 function PermissionCheckNode({ node, depth, selected, onToggle }: PermissionCheckNodeProps) {
@@ -53,11 +53,11 @@ function PermissionCheckNode({ node, depth, selected, onToggle }: PermissionChec
           <span className="min-w-0 flex-1 truncate text-sm font-medium">{node.label}</span>
           {hasChildren ? (
             <span className="shrink-0 text-xs text-muted-foreground">
-              {node.permissionIds.length} 项
+              {node.permissionCodes.length} 项
             </span>
           ) : (
             <Badge variant="secondary" className="min-w-0 truncate font-mono text-[11px]">
-              {node.permission?.code ?? node.code}
+              {node.code}
             </Badge>
           )}
         </label>

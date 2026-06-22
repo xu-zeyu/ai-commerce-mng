@@ -1,149 +1,181 @@
 'use client'
 
-import { useState } from 'react'
-import { KeyRound, Loader2, LockKeyhole, Pencil, Plus, Trash2, Users } from 'lucide-react'
+import { FormEvent, useMemo, useState } from 'react'
+import { CloudUpload, Loader2, Plus, RefreshCw, Search, ShieldCheck } from 'lucide-react'
+import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Badge } from '@/components/ui/badge'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog'
+import { Input } from '@/components/ui/input'
 import { Permissions } from '@/permissions/rbac'
-import { useRoleList, useDeleteRole } from '../hooks/use-roles'
+import { useDeleteRole, useRoleDetail, useRolePage, useSyncPermissions } from '../hooks/use-roles'
+import { isProtectedRole } from '../lib/role-guards'
+import { DeleteRoleDialog, SyncPermissionsDialog } from './role-confirm-dialogs'
 import { RoleFormDialog } from './role-form-dialog'
+import { RolePagination } from './role-pagination'
 import { RolePermissionDialog } from './role-permission-dialog'
-import { getRoleDisplayName, isProtectedRole } from '../lib/role-guards'
+import { RoleTable } from './role-table'
 import type { AdminRole } from '../types'
 
 const ROLE_MANAGE_CODES = [
   Permissions.ROLE_MANAGE,
   Permissions.ROLE_MANAGE_LEGACY,
+  'ADMIN_ROLE_CREATE',
+  'ADMIN_ROLE_UPDATE',
+  'ADMIN_ROLE_DELETE',
+  'ADMIN_ROLE_ASSIGN_PERMISSION',
+  'ADMIN_PERMISSION_SYNC',
 ] as const
 
 export function RoleListView() {
-  const { data: roles, isLoading } = useRoleList()
-  const deleteMutation = useDeleteRole()
-
-  const [formOpen, setFormOpen] = useState(false)
-  const [editData, setEditData] = useState<AdminRole | null>(null)
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [keyword, setKeyword] = useState('')
+  const [query, setQuery] = useState('')
+  const [createOpen, setCreateOpen] = useState(false)
+  const [editRoleId, setEditRoleId] = useState<number | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<AdminRole | null>(null)
+  const [syncOpen, setSyncOpen] = useState(false)
   const [permRole, setPermRole] = useState<AdminRole | null>(null)
 
-  const handleEdit = (item: AdminRole) => {
-    if (isProtectedRole(item)) return
-    setEditData(item)
-    setFormOpen(true)
+  const params = useMemo(
+    () => ({ page, size: pageSize, rname: query.trim() || undefined }),
+    [page, pageSize, query],
+  )
+  const { data, isLoading, isFetching, refetch } = useRolePage(params)
+  const { data: roleDetail } = useRoleDetail(editRoleId)
+  const deleteMutation = useDeleteRole()
+  const syncMutation = useSyncPermissions()
+
+  const roles = data?.records ?? []
+  const total = data?.total ?? 0
+  const formOpen = createOpen || Boolean(editRoleId && roleDetail)
+
+  const handleSearch = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault()
+    setPage(1)
+    setQuery(keyword)
   }
 
   const handleCreate = () => {
-    setEditData(null)
-    setFormOpen(true)
+    setEditRoleId(null)
+    setCreateOpen(true)
+  }
+
+  const handleEdit = (role: AdminRole) => {
+    if (isProtectedRole(role)) {
+      toast.warning('超级管理员角色不允许编辑')
+      return
+    }
+    setEditRoleId(role.id)
+  }
+
+  const handleAssign = (role: AdminRole) => {
+    if (isProtectedRole(role)) {
+      toast.warning('超级管理员默认拥有所有权限，无需分配')
+      return
+    }
+    setPermRole(role)
   }
 
   const handleDelete = async () => {
-    if (!deleteTarget) return
-    if (isProtectedRole(deleteTarget)) return
+    if (!deleteTarget || isProtectedRole(deleteTarget)) return
     await deleteMutation.mutateAsync(deleteTarget.id)
+    toast.success('角色删除成功')
     setDeleteTarget(null)
+  }
+
+  const handleSyncPermissions = async () => {
+    await syncMutation.mutateAsync()
+    toast.success('权限同步成功')
+    setSyncOpen(false)
+  }
+
+  const handlePageSizeChange = (nextPageSize: number) => {
+    setPage(1)
+    setPageSize(nextPageSize)
   }
 
   return (
     <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-2xl font-semibold">角色管理</h1>
-          <p className="mt-1 text-sm text-muted-foreground">管理系统角色与权限分配</p>
+      <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <div className="flex items-center gap-3">
+          <span className="flex size-11 items-center justify-center rounded-2xl bg-primary/10">
+            <ShieldCheck className="size-5 text-primary" />
+          </span>
+          <div>
+            <h1 className="text-2xl font-semibold">角色管理</h1>
+            <p className="mt-1 text-sm text-muted-foreground">管理系统角色、同步权限定义并分配角色权限</p>
+          </div>
         </div>
-        <Button onClick={handleCreate} permission={ROLE_MANAGE_CODES}>
-          <Plus className="size-4" />
-          新增角色
-        </Button>
+        <div className="flex flex-wrap gap-2">
+          <Button variant="outline" permission={ROLE_MANAGE_CODES} onClick={() => setSyncOpen(true)}>
+            <CloudUpload className="size-4" />
+            同步权限
+          </Button>
+          <Button permission={ROLE_MANAGE_CODES} onClick={handleCreate}>
+            <Plus className="size-4" />
+            新增角色
+          </Button>
+        </div>
       </div>
 
-      {/* List */}
-      {isLoading ? (
-        <div className="flex justify-center py-20">
-          <Loader2 className="size-6 animate-spin text-muted-foreground" />
+      <Card className="overflow-hidden">
+        <div className="flex flex-col gap-3 border-b border-border/70 p-4 lg:flex-row lg:items-center lg:justify-between">
+          <form onSubmit={handleSearch} className="flex w-full gap-2 lg:max-w-md">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                value={keyword}
+                onChange={(event) => setKeyword(event.target.value)}
+                placeholder="搜索角色名称"
+                className="pl-9"
+              />
+            </div>
+            <Button type="submit" variant="outline">
+              搜索
+            </Button>
+          </form>
+          <Button type="button" variant="ghost" onClick={() => refetch()} disabled={isFetching}>
+            <RefreshCw className={isFetching ? 'size-4 animate-spin' : 'size-4'} />
+            刷新
+          </Button>
         </div>
-      ) : !roles?.length ? (
-        <Card className="flex flex-col items-center justify-center py-20 rounded-2xl">
-          <Users className="size-12 text-muted-foreground/30" />
-          <p className="mt-4 text-sm text-muted-foreground">暂无角色数据</p>
-        </Card>
-      ) : (
-        <div className="grid gap-3">
-          {roles.map((item) => {
-            const protectedRole = isProtectedRole(item)
 
-            return (
-              <Card
-                key={item.id}
-                className="flex flex-col gap-4 rounded-2xl p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10">
-                    {protectedRole ? (
-                      <LockKeyhole className="size-5 text-primary" />
-                    ) : (
-                      <Users className="size-5 text-primary" />
-                    )}
-                  </div>
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2 font-medium">
-                      <span>{getRoleDisplayName(item)}</span>
-                      {protectedRole && (
-                        <Badge variant="secondary" className="rounded-lg">
-                          系统内置
-                        </Badge>
-                      )}
-                    </div>
-                    {item.description && (
-                      <p className="mt-0.5 text-sm text-muted-foreground">{item.description}</p>
-                    )}
-                  </div>
-                </div>
-                {protectedRole ? (
-                  <p className="text-sm text-muted-foreground">超级管理员角色不可查看、编辑或修改权限</p>
-                ) : (
-                  <div className="flex items-center gap-1 self-end sm:self-auto">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      permission={ROLE_MANAGE_CODES}
-                      onClick={() => setPermRole(item)}
-                      title="分配权限"
-                    >
-                      <KeyRound className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      permission={ROLE_MANAGE_CODES}
-                      onClick={() => handleEdit(item)}
-                      title="编辑角色"
-                    >
-                      <Pencil className="size-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      permission={ROLE_MANAGE_CODES}
-                      onClick={() => setDeleteTarget(item)}
-                      title="删除角色"
-                    >
-                      <Trash2 className="size-4 text-destructive" />
-                    </Button>
-                  </div>
-                )}
-              </Card>
-            )
-          })}
-        </div>
-      )}
+        {isLoading ? (
+          <div className="flex justify-center py-20">
+            <Loader2 className="size-6 animate-spin text-muted-foreground" />
+          </div>
+        ) : (
+          <RoleTable
+            roles={roles}
+            onAssign={handleAssign}
+            onEdit={handleEdit}
+            onDelete={(role) => {
+              if (isProtectedRole(role)) {
+                toast.warning('超级管理员角色不允许删除')
+                return
+              }
+              setDeleteTarget(role)
+            }}
+          />
+        )}
+        <RolePagination
+          page={page}
+          pageSize={pageSize}
+          total={total}
+          onPageChange={setPage}
+          onPageSizeChange={handlePageSizeChange}
+        />
+      </Card>
 
-      {/* Form Dialog */}
-      <RoleFormDialog open={formOpen} onClose={() => setFormOpen(false)} editData={editData} />
-
-      {/* Permission Dialog */}
+      <RoleFormDialog
+        open={formOpen}
+        onClose={() => {
+          setCreateOpen(false)
+          setEditRoleId(null)
+        }}
+        editData={createOpen ? null : roleDetail ?? null}
+      />
       <RolePermissionDialog
         open={!!permRole}
         onClose={() => setPermRole(null)}
@@ -151,29 +183,18 @@ export function RoleListView() {
         roleName={permRole?.rname ?? ''}
       />
 
-      {/* Delete Dialog */}
-      <Dialog open={!!deleteTarget} onOpenChange={(v) => !v && setDeleteTarget(null)}>
-        <DialogContent className="sm:max-w-sm">
-          <DialogHeader>
-            <DialogTitle>确认删除</DialogTitle>
-            <DialogDescription>
-              确定要删除角色「{deleteTarget ? getRoleDisplayName(deleteTarget) : ''}」吗？此操作不可撤销。
-            </DialogDescription>
-          </DialogHeader>
-          <div className="flex justify-end gap-3 pt-2">
-            <Button variant="outline" onClick={() => setDeleteTarget(null)}>取消</Button>
-            <Button
-              variant="destructive"
-              permission={ROLE_MANAGE_CODES}
-              onClick={handleDelete}
-              disabled={deleteMutation.isPending}
-            >
-              {deleteMutation.isPending && <Loader2 className="size-4 animate-spin" />}
-              删除
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
+      <DeleteRoleDialog
+        role={deleteTarget}
+        loading={deleteMutation.isPending}
+        onClose={() => setDeleteTarget(null)}
+        onConfirm={handleDelete}
+      />
+      <SyncPermissionsDialog
+        open={syncOpen}
+        loading={syncMutation.isPending}
+        onOpenChange={setSyncOpen}
+        onConfirm={handleSyncPermissions}
+      />
     </div>
   )
 }

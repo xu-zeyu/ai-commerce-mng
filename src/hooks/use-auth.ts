@@ -1,6 +1,12 @@
 "use client";
 
 import { useAuthStore } from "@/stores/use-auth-store";
+import {
+  EMPTY_AUTHORITIES,
+  hasPermission,
+  type PermissionCode,
+  type PermissionMatchMode,
+} from "@/permissions/rbac";
 
 export function useAuth() {
   const token = useAuthStore((s) => s.token);
@@ -12,11 +18,14 @@ export function useAuth() {
     user,
     isAuthenticated: !!token,
     logout,
-    permissions: user?.authorities ?? [],
+    permissions: user?.authorities ?? EMPTY_AUTHORITIES,
   };
 }
 
-export function useHasPermission(permission: string): boolean {
-  const authorities = useAuthStore((s) => s.user?.authorities ?? []);
-  return authorities.includes(permission);
+export function useHasPermission(
+  permission: PermissionCode,
+  mode: PermissionMatchMode = "any",
+): boolean {
+  const authorities = useAuthStore((s) => s.user?.authorities ?? EMPTY_AUTHORITIES);
+  return hasPermission(authorities, permission, mode);
 }

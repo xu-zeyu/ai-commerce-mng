@@ -27,8 +27,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   );
 
   useEffect(() => {
-    useAuthStore.persist.rehydrate();
-    setHydrated(true);
+    if (useAuthStore.persist.hasHydrated()) {
+      setHydrated(true);
+      return;
+    }
+
+    const unsubscribe = useAuthStore.persist.onFinishHydration(() => {
+      setHydrated(true);
+    });
+    void Promise.resolve(useAuthStore.persist.rehydrate()).finally(() => {
+      setHydrated(true);
+    });
+    return unsubscribe;
   }, []);
 
   useEffect(() => {

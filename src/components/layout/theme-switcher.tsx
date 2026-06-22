@@ -1,10 +1,10 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { motion } from 'framer-motion'
 import { cn } from '@/lib/utils'
+import { useMounted } from '@/hooks/use-mounted'
 
 type ThemeKey = 'light' | 'dark' | 'system'
 
@@ -16,8 +16,7 @@ const OPTIONS: { key: ThemeKey; label: string; icon: typeof Sun }[] = [
 
 export function ThemeSwitcher() {
   const { theme, setTheme } = useTheme()
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => setMounted(true), [])
+  const mounted = useMounted()
 
   const active = (mounted ? (theme as ThemeKey) : 'system') ?? 'system'
 

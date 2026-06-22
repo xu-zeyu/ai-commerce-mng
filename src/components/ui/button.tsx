@@ -5,11 +5,16 @@ import { Slot } from "@radix-ui/react-slot";
 import { cva, type VariantProps } from "class-variance-authority";
 
 import { cn } from "@/lib/utils";
-import { hasPermission, type PermissionCode } from "@/permissions/rbac";
+import {
+  EMPTY_AUTHORITIES,
+  hasPermission,
+  type PermissionCode,
+  type PermissionMatchMode,
+} from "@/permissions/rbac";
 import { useAuthStore } from "@/stores/use-auth-store";
 
 const buttonVariants = cva(
-  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50",
+  "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-xl text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50",
   {
     variants: {
       variant: {
@@ -42,7 +47,9 @@ export interface ButtonProps
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
   permission?: PermissionCode;
+  permissionMode?: PermissionMatchMode;
   unauthorizedMode?: "hide" | "disable";
+  unauthorizedReason?: string;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
@@ -53,24 +60,43 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       size,
       asChild = false,
       permission,
+      permissionMode = "any",
       unauthorizedMode = "hide",
+      unauthorizedReason = "暂无操作权限",
       disabled,
+      onClick,
+      title,
       ...props
     },
     ref,
   ) => {
-    const authorities = useAuthStore((s) => s.user?.authorities ?? []);
-    const allowed = !permission || hasPermission(authorities, permission);
+    const authorities = useAuthStore((s) => s.user?.authorities ?? EMPTY_AUTHORITIES);
+    const allowed = !permission || hasPermission(authorities, permission, permissionMode);
 
     if (!allowed && unauthorizedMode === "hide") return null;
 
     const Comp = asChild ? Slot : "button";
+    const isDisabled = disabled || !allowed;
+    const disabledProps = asChild ? {} : { disabled: isDisabled };
+    const handleClick: React.MouseEventHandler<HTMLButtonElement> = (event) => {
+      if (isDisabled) {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+      onClick?.(event);
+    };
+
     return (
       <Comp
         ref={ref}
         className={cn(buttonVariants({ variant, size, className }))}
-        disabled={disabled || !allowed}
+        aria-disabled={isDisabled || undefined}
+        data-permission-state={allowed ? "allowed" : "denied"}
+        title={!allowed ? unauthorizedReason : title}
+        onClick={handleClick}
         {...props}
+        {...disabledProps}
       />
     );
   },

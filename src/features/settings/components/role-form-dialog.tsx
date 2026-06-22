@@ -4,6 +4,7 @@ import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
+import { toast } from 'sonner'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -16,6 +17,8 @@ import type { AdminRole } from '../types'
 const ROLE_MANAGE_CODES = [
   Permissions.ROLE_MANAGE,
   Permissions.ROLE_MANAGE_LEGACY,
+  'ADMIN_ROLE_CREATE',
+  'ADMIN_ROLE_UPDATE',
 ] as const
 
 interface Props {
@@ -53,8 +56,10 @@ export function RoleFormDialog({ open, onClose, editData }: Props) {
   const onSubmit = async (values: RoleFormValues) => {
     if (isEdit) {
       await update.mutateAsync({ id: editData!.id, ...values })
+      toast.success('角色更新成功')
     } else {
       await create.mutateAsync(values)
+      toast.success('角色创建成功')
     }
     onClose()
   }
@@ -73,7 +78,13 @@ export function RoleFormDialog({ open, onClose, editData }: Props) {
           </div>
           <div className="space-y-2">
             <Label htmlFor="description">描述</Label>
-            <Input id="description" placeholder="角色描述（可选）" disabled={loading} {...register('description')} />
+            <textarea
+              id="description"
+              placeholder="角色描述（可选）"
+              disabled={loading}
+              className="min-h-24 w-full rounded-xl border border-input bg-background px-3 py-2 text-sm outline-none transition-colors placeholder:text-muted-foreground focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              {...register('description')}
+            />
           </div>
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="outline" onClick={onClose} disabled={loading}>

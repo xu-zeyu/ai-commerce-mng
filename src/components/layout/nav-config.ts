@@ -42,11 +42,6 @@ export const NAV_SECTIONS: NavSection[] = [
         icon: Settings,
         children: [
           {
-            label: '权限管理',
-            href: '/settings/permissions',
-            permission: [Permissions.PERMISSION_MANAGE, Permissions.PERMISSION_MANAGE_LEGACY],
-          },
-          {
             label: '角色管理',
             href: '/settings/roles',
             permission: [Permissions.ROLE_MANAGE, Permissions.ROLE_MANAGE_LEGACY],

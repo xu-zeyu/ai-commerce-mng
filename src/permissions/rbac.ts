@@ -27,27 +27,43 @@ export const Permissions = {
 } as const;
 
 export type PermissionCode = string | readonly string[];
+export type PermissionMatchMode = "any" | "all";
+
+export const EMPTY_AUTHORITIES: readonly string[] = [];
 
 const SUPER_ADMIN_CODES = new Set<string>([Permissions.SUB_ADMIN, "sub:admin"]);
 
-export function isSuperAdmin(authorities: string[]): boolean {
+export function isSuperAdmin(authorities: readonly string[]): boolean {
   return authorities.some((code) => SUPER_ADMIN_CODES.has(code));
 }
 
-function matchesPermission(authorities: string[], permission: string): boolean {
+function matchesPermission(authorities: readonly string[], permission: string): boolean {
   return authorities.includes(permission);
+}
+
+function matchPermissions(
+  authorities: readonly string[],
+  permissions: readonly string[],
+  mode: PermissionMatchMode,
+): boolean {
+  if (!permissions.length) return true;
+  if (mode === "all") {
+    return permissions.every((code) => matchesPermission(authorities, code));
+  }
+  return permissions.some((code) => matchesPermission(authorities, code));
 }
 
 /**
  * 检查权限列表是否包含指定权限。
  */
 export function hasPermission(
-  authorities: string[],
+  authorities: readonly string[],
   permission: PermissionCode,
+  mode: PermissionMatchMode = "any",
 ): boolean {
   if (isSuperAdmin(authorities)) return true;
   if (typeof permission !== "string") {
-    return permission.some((code) => matchesPermission(authorities, code));
+    return matchPermissions(authorities, permission, mode);
   }
   return matchesPermission(authorities, permission);
 }
@@ -56,18 +72,18 @@ export function hasPermission(
  * 检查是否拥有任一权限。
  */
 export function hasAnyPermission(
-  authorities: string[],
+  authorities: readonly string[],
   permissions: PermissionCode[],
 ): boolean {
-  return permissions.some((p) => hasPermission(authorities, p));
+  return permissions.some((p) => hasPermission(authorities, p, "any"));
 }
 
 /**
  * 检查是否拥有全部权限。
  */
 export function hasAllPermissions(
-  authorities: string[],
+  authorities: readonly string[],
   permissions: PermissionCode[],
 ): boolean {
-  return permissions.every((p) => hasPermission(authorities, p));
+  return permissions.every((p) => hasPermission(authorities, p, "all"));
 }
