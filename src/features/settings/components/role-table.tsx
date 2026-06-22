@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import { flexRender, getCoreRowModel, useReactTable, type ColumnDef } from '@tanstack/react-table'
+import { type ColumnDef } from '@tanstack/react-table'
 import { KeyRound, LockKeyhole, Pencil, ShieldCheck, Trash2, Users } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { Card } from '@/components/ui/card'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table'
+import { DataTable } from '@/components/common/data-table'
 import { Permissions } from '@/permissions/rbac'
 import { getRoleDisplayName, isProtectedRole } from '../lib/role-guards'
 import type { AdminRole } from '../types'
@@ -21,6 +21,7 @@ const ROLE_MANAGE_CODES = [
 
 interface RoleTableProps {
   roles: AdminRole[]
+  loading?: boolean
   onAssign: (role: AdminRole) => void
   onEdit: (role: AdminRole) => void
   onDelete: (role: AdminRole) => void
@@ -45,18 +46,18 @@ function RoleNameCell({ role }: { role: AdminRole }) {
 
   return (
     <div className="flex min-w-0 items-center gap-3">
-      <div className="flex size-10 shrink-0 items-center justify-center rounded-2xl bg-primary/10">
+      <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary/10">
         {protectedRole ? (
-          <LockKeyhole className="size-5 text-primary" />
+          <LockKeyhole className="size-4.5 text-primary" />
         ) : (
-          <Users className="size-5 text-primary" />
+          <Users className="size-4.5 text-primary" />
         )}
       </div>
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="truncate font-medium">{getRoleDisplayName(role)}</span>
+          <span className="truncate text-sm font-medium">{getRoleDisplayName(role)}</span>
           {protectedRole && (
-            <Badge variant="secondary" className="rounded-lg">
+            <Badge variant="secondary" className="rounded-md text-[11px]">
               系统内置
             </Badge>
           )}
@@ -71,7 +72,7 @@ function RoleNameCell({ role }: { role: AdminRole }) {
 
 function RoleActions({ role, onAssign, onEdit, onDelete }: RoleActionsProps) {
   if (isProtectedRole(role)) {
-    return <span className="text-sm text-muted-foreground">默认拥有全部权限</span>
+    return <span className="text-xs text-muted-foreground">默认拥有全部权限</span>
   }
 
   return (
@@ -107,18 +108,22 @@ function RoleActions({ role, onAssign, onEdit, onDelete }: RoleActionsProps) {
   )
 }
 
-export function RoleTable({ roles, onAssign, onEdit, onDelete }: RoleTableProps) {
+function RoleEmpty() {
+  return (
+    <div className="flex flex-col items-center justify-center py-12">
+      <ShieldCheck className="size-10 text-muted-foreground/30" />
+      <p className="mt-3 text-sm text-muted-foreground">暂无角色数据</p>
+    </div>
+  )
+}
+
+export function RoleTable({ roles, loading, onAssign, onEdit, onDelete }: RoleTableProps) {
   const columns = useMemo<ColumnDef<AdminRole>[]>(
     () => [
-      { accessorKey: 'id', header: 'ID', cell: ({ row }) => row.original.id },
+      { accessorKey: 'id', header: 'ID', cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.id}</span> },
       { accessorKey: 'rname', header: '角色名称', cell: ({ row }) => <RoleNameCell role={row.original} /> },
-      {
-        accessorKey: 'description',
-        header: '描述',
-        cell: ({ row }) => row.original.description || <span className="text-muted-foreground">-</span>,
-      },
-      { accessorKey: 'createdTime', header: '创建时间', cell: ({ row }) => formatDate(row.original.createdTime) },
-      { accessorKey: 'updatedTime', header: '更新时间', cell: ({ row }) => formatDate(row.original.updatedTime) },
+      { accessorKey: 'createdTime', header: '创建时间', cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDate(row.original.createdTime)}</span> },
+      { accessorKey: 'updatedTime', header: '更新时间', cell: ({ row }) => <span className="text-sm text-muted-foreground">{formatDate(row.original.updatedTime)}</span> },
       {
         id: 'operation',
         header: () => <span className="block text-right">操作</span>,
@@ -129,61 +134,27 @@ export function RoleTable({ roles, onAssign, onEdit, onDelete }: RoleTableProps)
     ],
     [onAssign, onDelete, onEdit],
   )
-  // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table manages its own memoized table instance.
-  const table = useReactTable({ data: roles, columns, getCoreRowModel: getCoreRowModel() })
-
-  if (!roles.length) {
-    return (
-      <div className="flex flex-col items-center justify-center px-4 py-20">
-        <ShieldCheck className="size-12 text-muted-foreground/30" />
-        <p className="mt-4 text-sm text-muted-foreground">暂无角色数据</p>
-      </div>
-    )
-  }
 
   return (
-    <>
-      <div className="hidden md:block">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <TableHead key={header.id}>
-                    {flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows.map((row) => (
-              <TableRow key={row.id}>
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-      <div className="grid gap-3 p-4 md:hidden">
-        {roles.map((role) => (
-          <Card key={role.id} className="p-4">
-            <div className="flex items-start justify-between gap-3">
-              <RoleNameCell role={role} />
-              <RoleActions role={role} onAssign={onAssign} onEdit={onEdit} onDelete={onDelete} />
-            </div>
-            <div className="mt-4 grid gap-2 text-xs text-muted-foreground">
-              <span>ID：{role.id}</span>
-              <span>创建时间：{formatDate(role.createdTime)}</span>
-              <span>更新时间：{formatDate(role.updatedTime)}</span>
-            </div>
-          </Card>
-        ))}
-      </div>
-    </>
+    <DataTable
+      columns={columns}
+      data={roles}
+      loading={loading}
+      getRowId={(role) => String(role.id)}
+      empty={<RoleEmpty />}
+      renderMobileCard={(role) => (
+        <Card className="p-4">
+          <div className="flex items-start justify-between gap-3">
+            <RoleNameCell role={role} />
+            <RoleActions role={role} onAssign={onAssign} onEdit={onEdit} onDelete={onDelete} />
+          </div>
+          <div className="mt-4 grid gap-2 text-xs text-muted-foreground">
+            <span>ID：{role.id}</span>
+            <span>创建时间：{formatDate(role.createdTime)}</span>
+            <span>更新时间：{formatDate(role.updatedTime)}</span>
+          </div>
+        </Card>
+      )}
+    />
   )
 }

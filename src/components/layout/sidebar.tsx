@@ -42,8 +42,8 @@ export function Sidebar({ onNavigate, forceExpanded }: Props) {
             <Image src={logo} alt="金晗跨境" width={36} height={36} className="rounded-xl shadow-sm shrink-0" />
             {!isCollapsed && (
               <div className="leading-tight">
-                <div className="text-base font-semibold">金晗跨境</div>
-                <div className="text-xs text-muted-foreground">电商管理后台</div>
+                <div className="text-sm font-semibold">金晗跨境</div>
+                <div className="text-[11px] text-muted-foreground">电商管理后台</div>
               </div>
             )}
           </div>
@@ -57,7 +57,7 @@ export function Sidebar({ onNavigate, forceExpanded }: Props) {
             {sections.map((section) => (
               <div key={section.label} className="space-y-1.5">
                 {!isCollapsed && (
-                  <div className="px-3 text-[11px] font-semibold uppercase tracking-wider text-muted-foreground">
+                  <div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                     {section.label}
                   </div>
                 )}

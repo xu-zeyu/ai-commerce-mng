@@ -66,32 +66,33 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
     return (
       <Link
         href={item.href}
-        className={`group flex items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors ${
+        className={`group flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors ${
           active
             ? 'bg-primary/10 text-primary'
             : 'text-muted-foreground hover:bg-muted hover:text-foreground'
         }`}
       >
-        {Icon && <Icon className="size-4.5 shrink-0" />}
+        {Icon && <Icon className="size-4 shrink-0" />}
         <span>{item.label}</span>
       </Link>
     )
   }
 
+  // 父级带子层级：激活时不显示激活背景色，仅高亮文字，激活背景由子层级承载
   return (
     <Collapsible open={displayOpen} onOpenChange={setOpen}>
       <CollapsibleTrigger
-        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2.5 text-sm font-medium transition-colors hover:bg-muted hover:text-foreground ${
-          active || childActive ? 'bg-primary/10 text-primary' : 'text-muted-foreground'
+        className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-muted hover:text-foreground ${
+          childActive ? 'text-primary' : 'text-muted-foreground'
         }`}
       >
-        {Icon && <Icon className="size-4.5 shrink-0" />}
+        {Icon && <Icon className="size-4 shrink-0" />}
         <span className="flex-1 text-left">{item.label}</span>
         <motion.div
           animate={{ rotate: open ? 90 : 0 }}
           transition={{ duration: 0.2 }}
         >
-          <ChevronRight className="size-4 text-muted-foreground/60" />
+          <ChevronRight className="size-3.5 text-muted-foreground/60" />
         </motion.div>
       </CollapsibleTrigger>
       <CollapsibleContent>
@@ -108,7 +109,7 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
               <Link
                 key={child.href}
                 href={child.href}
-                className={`block rounded-lg px-3 py-2 text-sm transition-colors ${
+                className={`block rounded-lg px-3 py-1.5 text-[13px] transition-colors ${
                   pathname === child.href
                     ? 'bg-primary/10 text-primary font-medium'
                     : 'text-muted-foreground hover:bg-muted hover:text-foreground'
