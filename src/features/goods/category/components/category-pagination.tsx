@@ -15,7 +15,7 @@ export function CategoryPagination({ page, pageSize, total, onPageChange, onPage
   const pageCount = Math.max(1, Math.ceil(total / pageSize))
 
   return (
-    <div className="flex flex-col gap-3 border-t border-border/60 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+    <div className="flex flex-col gap-3 rounded-2xl border border-border/60 bg-card/80 px-4 py-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:flex-row sm:items-center sm:justify-between">
       <p className="text-sm text-muted-foreground">
         共 {total} 个分类，第 {page} / {pageCount} 页
       </p>

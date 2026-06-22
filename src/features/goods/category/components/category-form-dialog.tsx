@@ -13,6 +13,7 @@ import { CATEGORY_CREATE_CODES, CATEGORY_MUTATE_CODES } from '../lib/category-pe
 import { findCategory, flattenCategoryTree } from '../lib/category-tree'
 import { categorySchema, type CategoryFormValues } from '../schemas/category-schema'
 import { useCreateCategory, useUpdateCategory } from '../hooks/use-categories'
+import { CategoryIcon } from './category-icon'
 import type { GoodsCategory, GoodsCategoryTreeNode } from '../types'
 
 interface Props {
@@ -41,6 +42,7 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
   })
 
   const parentId = useWatch({ control, name: 'parentId' })
+  const iconValue = useWatch({ control, name: 'icon' })
   const selectedParent = parentId > 0 ? findCategory(tree, parentId) : null
   const level = selectedParent ? selectedParent.level + 1 : 1
   const loading = create.isPending || update.isPending
@@ -118,8 +120,11 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="icon">图标</Label>
-              <Input id="icon" placeholder="📦 或图标 URL" disabled={loading} {...register('icon')} />
+              <Label htmlFor="icon">图标 / 图片</Label>
+              <div className="flex items-center gap-3">
+                <CategoryIcon value={iconValue} name="分类" className="size-10 shrink-0" />
+                <Input id="icon" placeholder="📦 或 PNG 图片地址" disabled={loading} {...register('icon')} />
+              </div>
               {errors.icon && <p className="text-xs text-destructive">{errors.icon.message}</p>}
             </div>
 

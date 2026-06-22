@@ -1,15 +1,21 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { FolderTree, Plus } from 'lucide-react'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
-import { Card } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { DataTableToolbar } from '@/components/common/data-table-toolbar'
 import { useCategoryPageStore } from '@/stores/use-category-page-store'
 import { CATEGORY_CREATE_CODES } from '../lib/category-permissions'
-import { countEnabled, countTree, findCategory, flattenCategoryTree, getMaxLevel } from '../lib/category-tree'
+import {
+  countEnabled,
+  countTree,
+  createCategoryMetaMap,
+  getCategoryPath,
+  getMaxLevel,
+} from '../lib/category-tree'
 import { useCategoryPage, useCategoryTree, useDeleteCategory } from '../hooks/use-categories'
+import { CategoryBreadcrumb } from './category-breadcrumb'
 import { CategoryCardList } from './category-card-list'
 import { CategoryDeleteDialog } from './category-delete-dialog'
 import { CategoryFormDialog } from './category-form-dialog'
@@ -38,8 +44,9 @@ export function CategoryPageView() {
   const tree = treeQuery.data ?? []
   const categories = pageQuery.data?.records ?? []
   const total = pageQuery.data?.total ?? 0
-  const parentOptions = flattenCategoryTree(tree)
-  const activeParent = parentId > 0 ? findCategory(tree, parentId) : null
+  const breadcrumbPath = useMemo(() => getCategoryPath(tree, parentId), [tree, parentId])
+  const metaMap = useMemo(() => createCategoryMetaMap(tree), [tree])
+  const currentName = breadcrumbPath.at(-1)?.name ?? '全部一级分类'
 
   const handleSearch = () => {
     setPage(1)
@@ -63,23 +70,28 @@ export function CategoryPageView() {
     setDeleteTarget(null)
   }
 
+  const handleNavigate = (id: number) => {
+    setParentId(id)
+    setPage(1)
+  }
+
   return (
-    <div className="mx-auto flex max-w-7xl animate-fade-in flex-col gap-6 p-6 md:p-10">
-      <header className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <div className="flex items-center gap-3">
-          <span className="flex size-12 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <FolderTree className="size-6" />
-          </span>
+    <div className="space-y-6">
+      <section className="rounded-2xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-xl dark:bg-card/65 sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
-            <h1 className="text-2xl font-semibold tracking-tight">商品分类</h1>
-            <p className="mt-1 text-sm text-muted-foreground">维护商品类目层级、启停状态和前台展示顺序</p>
+            <p className="text-sm font-medium text-primary">商品中心</p>
+            <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">商品分类</h1>
+            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
+              当前查看 {currentName}，支持按父子层级维护分类、图片图标、启停状态与排序。
+            </p>
           </div>
+          <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate} className="w-full sm:w-auto">
+            <Plus className="size-4" />
+            新增分类
+          </Button>
         </div>
-        <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
-          <Plus className="size-4" />
-          新增分类
-        </Button>
-      </header>
+      </section>
 
       <CategorySummaryCards
         total={countTree(tree)}
@@ -88,13 +100,13 @@ export function CategoryPageView() {
         maxLevel={getMaxLevel(tree)}
       />
 
-      <div className="grid gap-4 lg:grid-cols-[320px_1fr]">
-        <div className="space-y-4">
-          <CategoryTreePanel tree={tree} activeId={parentId} onSelect={setParentId} />
+      <div className="grid gap-6 xl:grid-cols-[320px_1fr]">
+        <div className="space-y-5">
+          <CategoryTreePanel tree={tree} activeId={parentId} onSelect={handleNavigate} />
           <CategoryInsightChart tree={tree} />
         </div>
 
-        <Card className="overflow-hidden border-border/60 shadow-sm">
+        <section className="min-w-0 space-y-4">
           <DataTableToolbar
             searchValue={keyword}
             onSearchChange={setKeyword}
@@ -105,35 +117,16 @@ export function CategoryPageView() {
               treeQuery.refetch()
             }}
             refreshing={pageQuery.isFetching || treeQuery.isFetching}
-            filters={
-              <select
-                value={parentId}
-                onChange={(event) => setParentId(Number(event.target.value))}
-                className="h-10 w-full rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring sm:w-56"
-              >
-                <option value={0}>一级分类</option>
-                {parentOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            }
-            actions={
-              <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
-                <Plus className="size-4" />
-                新增
-              </Button>
-            }
+            className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
           />
-          <div className="border-b border-border/60 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
-            当前查看：{activeParent ? `「${activeParent.name}」的子分类` : '一级分类'}
-          </div>
+          <CategoryBreadcrumb path={breadcrumbPath} total={total} onNavigate={handleNavigate} />
           <CategoryCardList
             categories={categories}
             loading={pageQuery.isLoading}
+            metaMap={metaMap}
             onEdit={handleEdit}
             onDelete={setDeleteTarget}
+            onDrillDown={handleNavigate}
           />
           <CategoryPagination
             page={page}
@@ -142,7 +135,7 @@ export function CategoryPageView() {
             onPageChange={setPage}
             onPageSizeChange={setPageSize}
           />
-        </Card>
+        </section>
       </div>
 
       <CategoryFormDialog
