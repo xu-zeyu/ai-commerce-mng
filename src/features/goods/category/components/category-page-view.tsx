@@ -4,6 +4,12 @@ import { useMemo, useState } from 'react'
 import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '@/components/ui/tooltip'
 import { DataTableToolbar } from '@/components/common/data-table-toolbar'
 import { useCategoryPageStore } from '@/stores/use-category-page-store'
 import { CATEGORY_CREATE_CODES } from '../lib/category-permissions'
@@ -11,8 +17,10 @@ import {
   countEnabled,
   countTree,
   createCategoryMetaMap,
+  findCategory,
   getCategoryPath,
   getMaxLevel,
+  MAX_CATEGORY_LEVEL,
 } from '../lib/category-tree'
 import { useCategoryPage, useCategoryTree, useDeleteCategory } from '../hooks/use-categories'
 import { CategoryBreadcrumb } from './category-breadcrumb'
@@ -46,7 +54,8 @@ export function CategoryPageView() {
   const total = pageQuery.data?.total ?? 0
   const breadcrumbPath = useMemo(() => getCategoryPath(tree, parentId), [tree, parentId])
   const metaMap = useMemo(() => createCategoryMetaMap(tree), [tree])
-  const currentName = breadcrumbPath.at(-1)?.name ?? '全部一级分类'
+  const currentParent = parentId > 0 ? findCategory(tree, parentId) : null
+  const isMaxLevel = currentParent ? currentParent.level >= MAX_CATEGORY_LEVEL : false
 
   const handleSearch = () => {
     setPage(1)
@@ -102,10 +111,26 @@ export function CategoryPageView() {
             }}
             refreshing={pageQuery.isFetching || treeQuery.isFetching}
             actions={
-              <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
-                <Plus className="size-4" />
-                新增
-              </Button>
+              isMaxLevel ? (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <span>
+                        <Button permission={CATEGORY_CREATE_CODES} disabled onClick={handleCreate}>
+                          <Plus className="size-4" />
+                          新增
+                        </Button>
+                      </span>
+                    </TooltipTrigger>
+                    <TooltipContent>分类层级已达上限（最多 3 级），无法继续新增子级</TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              ) : (
+                <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
+                  <Plus className="size-4" />
+                  新增
+                </Button>
+              )
             }
             className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
           />

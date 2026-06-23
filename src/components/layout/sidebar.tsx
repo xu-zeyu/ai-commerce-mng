@@ -10,7 +10,6 @@ import { TooltipProvider } from '@/components/ui/tooltip'
 import { useFilteredNav } from '@/hooks/use-filtered-nav'
 import { useSidebarStore } from '@/stores/use-sidebar-store'
 import { NavItem } from './nav-item'
-import { ThemeSwitcher } from './theme-switcher'
 import { ThemeColorSwitcher } from './theme-color-switcher'
 import logo from '@/assets/logo.png'
 
@@ -41,9 +40,9 @@ export function Sidebar({ onNavigate, forceExpanded }: Props) {
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <Image src={logo} alt="金晗跨境" width={36} height={36} className="rounded-xl shadow-sm shrink-0" />
             {!isCollapsed && (
-              <div className="leading-tight">
-                <div className="text-sm font-semibold">金晗跨境</div>
-                <div className="text-[11px] text-muted-foreground">电商管理后台</div>
+              <div className="min-w-0 leading-tight">
+                <div className="truncate whitespace-nowrap text-sm font-semibold">金晗跨境</div>
+                <div className="truncate whitespace-nowrap text-[11px] text-muted-foreground">电商管理后台</div>
               </div>
             )}
           </div>
@@ -57,7 +56,7 @@ export function Sidebar({ onNavigate, forceExpanded }: Props) {
             {sections.map((section) => (
               <div key={section.label} className="space-y-1.5">
                 {!isCollapsed && (
-                  <div className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  <div className="truncate whitespace-nowrap px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                     {section.label}
                   </div>
                 )}
@@ -82,7 +81,6 @@ export function Sidebar({ onNavigate, forceExpanded }: Props) {
             <Separator />
             <div className="space-y-3 px-4 py-3">
               <ThemeColorSwitcher />
-              <ThemeSwitcher />
             </div>
           </>
         )}

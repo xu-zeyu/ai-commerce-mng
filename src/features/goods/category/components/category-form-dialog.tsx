@@ -10,7 +10,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { CATEGORY_CREATE_CODES, CATEGORY_MUTATE_CODES } from '../lib/category-permissions'
-import { findCategory, flattenCategoryTree } from '../lib/category-tree'
+import { findCategory, flattenCategoryTree, MAX_CATEGORY_LEVEL } from '../lib/category-tree'
 import { categorySchema, type CategoryFormValues } from '../schemas/category-schema'
 import { useCreateCategory, useUpdateCategory } from '../hooks/use-categories'
 import { CategoryIcon } from './category-icon'
@@ -28,7 +28,13 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
   const isEdit = Boolean(editData)
   const create = useCreateCategory()
   const update = useUpdateCategory()
-  const parentOptions = useMemo(() => flattenCategoryTree(tree).filter((item) => item.id !== editData?.id), [tree, editData])
+  const parentOptions = useMemo(
+    () =>
+      flattenCategoryTree(tree).filter(
+        (item) => item.id !== editData?.id && item.level < MAX_CATEGORY_LEVEL,
+      ),
+    [tree, editData],
+  )
 
   const {
     register,

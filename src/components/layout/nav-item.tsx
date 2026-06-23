@@ -34,8 +34,8 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
   const hasChildren = item.children && item.children.length > 0
   const active = isActive(item.href)
   const childActive = hasActiveChild(item, pathname)
+  // open 为唯一展开状态：初始随激活态展开，但用户可随时通过箭头自由收起/展开
   const [open, setOpen] = useState(active || childActive)
-  const displayOpen = open || active || childActive
   const leafHref = useMemo(() => findFirstLeaf(item), [item])
 
   const Icon = item.icon
@@ -73,21 +73,21 @@ export function NavItem({ item, collapsed, isActive }: NavItemProps) {
         }`}
       >
         {Icon && <Icon className="size-4 shrink-0" />}
-        <span>{item.label}</span>
+        <span className="truncate whitespace-nowrap">{item.label}</span>
       </Link>
     )
   }
 
   // 父级带子层级：激活时不显示激活背景色，仅高亮文字，激活背景由子层级承载
   return (
-    <Collapsible open={displayOpen} onOpenChange={setOpen}>
+    <Collapsible open={open} onOpenChange={setOpen}>
       <CollapsibleTrigger
         className={`group flex w-full items-center gap-3 rounded-xl px-3 py-2 text-[13px] font-medium transition-colors hover:bg-muted hover:text-foreground ${
           childActive ? 'text-primary' : 'text-muted-foreground'
         }`}
       >
         {Icon && <Icon className="size-4 shrink-0" />}
-        <span className="flex-1 text-left">{item.label}</span>
+        <span className="flex-1 truncate whitespace-nowrap text-left">{item.label}</span>
         <motion.div
           animate={{ rotate: open ? 90 : 0 }}
           transition={{ duration: 0.2 }}

@@ -32,6 +32,16 @@ export const ADMIN_PERMISSION_MODULES: PermissionModule[] = [
           { code: Permissions.GOODS_CATEGORY_TREE, label: '树形列表' },
         ],
       },
+      {
+        code: 'GOODS_BRAND',
+        label: '商品品牌',
+        actions: [
+          { code: Permissions.GOODS_BRAND_CREATE, label: '新增品牌' },
+          { code: Permissions.GOODS_BRAND_PAGE, label: '分页列表' },
+          { code: Permissions.GOODS_BRAND_UPDATE, label: '编辑品牌' },
+          { code: Permissions.GOODS_BRAND_DELETE, label: '删除品牌' },
+        ],
+      },
     ],
   },
 ]

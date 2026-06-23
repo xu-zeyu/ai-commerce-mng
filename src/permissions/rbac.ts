@@ -8,21 +8,22 @@
  * 常用权限编码（与后端 AdminPermissionConst 对齐）：
  */
 export const Permissions = {
-  DASHBOARD_VIEW: "dashboard:view",
+  // Backend AdminPermissionConst
   SUB_ADMIN: "SUB_ADMIN",
   GOODS_CATEGORY_CREATE: "GOODS_CATEGORY_CREATE",
   GOODS_CATEGORY_PAGE: "GOODS_CATEGORY_PAGE",
   GOODS_CATEGORY_TREE: "GOODS_CATEGORY_TREE",
+  GOODS_BRAND_CREATE: "GOODS_BRAND_CREATE",
+  GOODS_BRAND_PAGE: "GOODS_BRAND_PAGE",
+  GOODS_BRAND_UPDATE: "GOODS_BRAND_UPDATE",
+  GOODS_BRAND_DELETE: "GOODS_BRAND_DELETE",
+
+  // Frontend legacy compatibility
+  DASHBOARD_VIEW: "dashboard:view",
   PERMISSION_MANAGE: "permission:manage",
   PERMISSION_MANAGE_LEGACY: "PERMISSION_MANAGE",
   ROLE_MANAGE: "role:manage",
   ROLE_MANAGE_LEGACY: "ROLE_MANAGE",
-  PRODUCT_VIEW: "product:view",
-  PRODUCT_MANAGE: "product:manage",
-  ORDER_VIEW: "order:view",
-  ORDER_MANAGE: "order:manage",
-  STORE_VIEW: "store:view",
-  STORE_MANAGE: "store:manage",
   CATEGORY_VIEW: "category:view",
   CATEGORY_MANAGE: "category:manage",
   SETTINGS_MANAGE: "settings:manage",

@@ -1,5 +1,8 @@
 import type { GoodsCategoryTreeNode } from '../types'
 
+/** 分类最大层级深度 */
+export const MAX_CATEGORY_LEVEL = 3
+
 export interface CategoryOption {
   id: number
   name: string

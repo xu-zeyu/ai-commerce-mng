@@ -40,5 +40,4 @@ export interface CreateCategoryPayload {
   status: CategoryStatus
 }
 
-export interface UpdateCategoryPayload extends CreateCategoryPayload {
-}
+export type UpdateCategoryPayload = CreateCategoryPayload

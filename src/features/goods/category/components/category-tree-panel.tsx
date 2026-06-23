@@ -1,6 +1,6 @@
 'use client'
 
-import { FolderOpen, Layers3 } from 'lucide-react'
+import { Layers3 } from 'lucide-react'
 import { motion } from 'framer-motion'
 import { Badge } from '@/components/ui/badge'
 import { Card } from '@/components/ui/card'

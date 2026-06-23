@@ -43,8 +43,8 @@ export const NAV_SECTIONS: NavSection[] = [
             permission: [
               Permissions.CATEGORY_VIEW,
               Permissions.CATEGORY_MANAGE,
-              'GOODS_CATEGORY_PAGE',
-              'GOODS_CATEGORY_TREE',
+              Permissions.GOODS_CATEGORY_PAGE,
+              Permissions.GOODS_CATEGORY_TREE,
             ],
           },
         ],

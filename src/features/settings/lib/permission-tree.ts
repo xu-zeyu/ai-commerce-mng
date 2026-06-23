@@ -2,6 +2,7 @@ import type { AdminPermission, PermissionTreeNode } from '../types'
 
 const CODE_LABELS: Record<string, string> = {
   admin: '管理员',
+  brand: '品牌',
   category: '分类',
   create: '新增',
   dashboard: '工作台',
@@ -30,6 +31,10 @@ const FULL_CODE_LABELS: Record<string, string> = {
   GOODS_CATEGORY_CREATE: '商品分类新增',
   GOODS_CATEGORY_PAGE: '商品分类分页',
   GOODS_CATEGORY_TREE: '商品分类树形',
+  GOODS_BRAND_CREATE: '商品品牌新增',
+  GOODS_BRAND_PAGE: '商品品牌分页',
+  GOODS_BRAND_UPDATE: '商品品牌编辑',
+  GOODS_BRAND_DELETE: '商品品牌删除',
   PERMISSION_MANAGE: '权限管理',
   ROLE_MANAGE: '角色管理',
   SETTINGS_MANAGE: '设置管理',
