@@ -50,7 +50,7 @@ export function CategoryCardList({
   if (categories.length === 0) {
     return (
       <div className="flex min-h-64 flex-col items-center justify-center p-8 text-center">
-        <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+        <div className="flex size-10 items-center justify-center rounded-2xl bg-primary/10 text-primary">
           <Layers3 className="size-6" />
         </div>
         <h3 className="mt-4 text-base font-semibold">暂无分类</h3>
@@ -81,7 +81,7 @@ export function CategoryCardList({
                 onClick={() => onDrillDown(category.id)}
                 className="flex min-w-0 items-center gap-3 text-left transition-colors hover:text-primary"
               >
-                <CategoryIcon value={category.icon} name={category.name} className="size-12 shrink-0" />
+                <CategoryIcon value={category.icon} name={category.name} className="size-5 shrink-0" />
                 <div className="min-w-0">
                   <h3 className="truncate text-base font-semibold">{category.name}</h3>
                   <p className="mt-1 text-xs text-muted-foreground">

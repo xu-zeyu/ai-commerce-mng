@@ -45,7 +45,7 @@ export function CategoryIcon({ value, name, className }: Props) {
   if (!icon) {
     return (
       <span className={cn('flex items-center justify-center rounded-2xl bg-secondary text-primary', className)}>
-        <ImageIcon className="size-5" />
+        <ImageIcon className="size-4" />
       </span>
     )
   }
@@ -54,13 +54,13 @@ export function CategoryIcon({ value, name, className }: Props) {
     const imageSrc = normalizeImageSource(icon)
 
     return (
-      <span className={cn('relative overflow-hidden rounded-2xl bg-secondary ring-1 ring-border/60', className)}>
+      <span className={cn('relative  bg-white size-5', className)}>
         <Image
           src={imageSrc}
           alt={`${name} 分类图标`}
           fill
-          sizes="48px"
-          className="object-cover"
+          sizes="34px"
+          className="object-contain"
           unoptimized={imageSrc.startsWith('data:image/') || imageSrc.endsWith('.svg')}
         />
       </span>

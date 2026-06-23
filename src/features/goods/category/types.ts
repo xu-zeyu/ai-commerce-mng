@@ -41,5 +41,4 @@ export interface CreateCategoryPayload {
 }
 
 export interface UpdateCategoryPayload extends CreateCategoryPayload {
-  id: number
 }

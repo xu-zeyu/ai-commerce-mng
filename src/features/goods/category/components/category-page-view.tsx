@@ -77,22 +77,6 @@ export function CategoryPageView() {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-2xl border border-border/60 bg-card/75 p-5 shadow-sm backdrop-blur-xl dark:bg-card/65 sm:p-6">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-sm font-medium text-primary">商品中心</p>
-            <h1 className="mt-2 text-2xl font-semibold tracking-normal sm:text-3xl">商品分类</h1>
-            <p className="mt-2 max-w-2xl text-sm text-muted-foreground">
-              当前查看 {currentName}，支持按父子层级维护分类、图片图标、启停状态与排序。
-            </p>
-          </div>
-          <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate} className="w-full sm:w-auto">
-            <Plus className="size-4" />
-            新增分类
-          </Button>
-        </div>
-      </section>
-
       <CategorySummaryCards
         total={countTree(tree)}
         enabled={countEnabled(tree)}
@@ -117,6 +101,12 @@ export function CategoryPageView() {
               treeQuery.refetch()
             }}
             refreshing={pageQuery.isFetching || treeQuery.isFetching}
+            actions={
+              <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
+                <Plus className="size-4" />
+                新增
+              </Button>
+            }
             className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
           />
           <CategoryBreadcrumb path={breadcrumbPath} total={total} onNavigate={handleNavigate} />
