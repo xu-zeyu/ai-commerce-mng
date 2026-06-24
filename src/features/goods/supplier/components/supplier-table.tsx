@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Edit3 } from 'lucide-react'
+import { Edit3, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/common/data-table'
-import { SUPPLIER_UPDATE_CODES } from '../lib/supplier-permissions'
+import { SUPPLIER_DELETE_CODES, SUPPLIER_UPDATE_CODES } from '../lib/supplier-permissions'
 import type { Supplier } from '../types'
 
 interface Props {
@@ -14,6 +14,7 @@ interface Props {
   loading?: boolean
   refreshing?: boolean
   onEdit: (supplier: Supplier) => void
+  onDelete: (supplier: Supplier) => void
   onRefresh?: () => void
 }
 
@@ -29,7 +30,7 @@ function formatDate(value?: string) {
   return value ? value.slice(0, 10) : '—'
 }
 
-export function SupplierTable({ data, loading, refreshing, onEdit, onRefresh }: Props) {
+export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onRefresh }: Props) {
   const columns = useMemo<ColumnDef<Supplier>[]>(
     () => [
       {
@@ -60,6 +61,13 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onRefresh }: 
         cell: ({ row }) => row.original.email || '—',
       },
       {
+        accessorKey: 'remark',
+        header: '备注',
+        cell: ({ row }) => (
+          <span className="text-muted-foreground line-clamp-1">{row.original.remark || '—'}</span>
+        ),
+      },
+      {
         accessorKey: 'status',
         header: '状态',
         cell: ({ row }) => <StatusBadge status={row.original.status} />,
@@ -75,20 +83,34 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onRefresh }: 
         id: 'actions',
         header: '操作',
         cell: ({ row }) => (
-          <Button
-            type="button"
-            variant="outline"
-            size="sm"
-            permission={SUPPLIER_UPDATE_CODES}
-            onClick={() => onEdit(row.original)}
-          >
-            <Edit3 className="size-3.5" />
-            编辑
-          </Button>
+          <div className="flex items-center gap-1">
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              permission={SUPPLIER_UPDATE_CODES}
+              onClick={() => onEdit(row.original)}
+            >
+              <Edit3 className="size-3.5" />
+              编辑
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-destructive"
+              permission={SUPPLIER_DELETE_CODES}
+              onClick={() => onDelete(row.original)}
+            >
+              <Trash2 className="size-3.5" />
+              删除
+            </Button>
+          </div>
         ),
       },
     ],
-    [onEdit],
+    [onEdit, onDelete],
   )
 
   return (
@@ -126,21 +148,39 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onRefresh }: 
                 <dt>邮箱</dt>
                 <dd className="text-foreground">{row.email || '—'}</dd>
               </div>
+              {row.remark && (
+                <div className="flex justify-between gap-2">
+                  <dt>备注</dt>
+                  <dd className="text-foreground line-clamp-1">{row.remark}</dd>
+                </div>
+              )}
               <div className="flex justify-between gap-2">
                 <dt>创建时间</dt>
                 <dd className="text-foreground">{formatDate(row.createdTime)}</dd>
               </div>
             </dl>
-            <div className="flex justify-end pt-1">
+            <div className="flex items-center justify-end gap-1 pt-1">
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
                 size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
                 permission={SUPPLIER_UPDATE_CODES}
                 onClick={() => onEdit(row)}
               >
                 <Edit3 className="size-3.5" />
                 编辑
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-destructive"
+                permission={SUPPLIER_DELETE_CODES}
+                onClick={() => onDelete(row)}
+              >
+                <Trash2 className="size-3.5" />
+                删除
               </Button>
             </div>
           </div>

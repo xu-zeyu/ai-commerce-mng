@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createSupplier } from '../api/create-supplier'
+import { deleteSupplier } from '../api/delete-supplier'
 import { getSupplierPage } from '../api/get-supplier-page'
 import { updateSupplier } from '../api/update-supplier'
 import type { SupplierPageParams } from '../types'
@@ -25,6 +26,14 @@ export function useUpdateSupplier() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: updateSupplier,
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: SUPPLIER_QUERY_KEY }),
+  })
+}
+
+export function useDeleteSupplier() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: deleteSupplier,
     onSuccess: () => queryClient.invalidateQueries({ queryKey: SUPPLIER_QUERY_KEY }),
   })
 }
