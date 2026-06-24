@@ -22,6 +22,8 @@ const ROLE_MANAGE_CODES = [
 interface RoleTableProps {
   roles: AdminRole[]
   loading?: boolean
+  refreshing?: boolean
+  onRefresh?: () => void
   onAssign: (role: AdminRole) => void
   onEdit: (role: AdminRole) => void
   onDelete: (role: AdminRole) => void
@@ -117,7 +119,15 @@ function RoleEmpty() {
   )
 }
 
-export function RoleTable({ roles, loading, onAssign, onEdit, onDelete }: RoleTableProps) {
+export function RoleTable({
+  roles,
+  loading,
+  refreshing,
+  onRefresh,
+  onAssign,
+  onEdit,
+  onDelete,
+}: RoleTableProps) {
   const columns = useMemo<ColumnDef<AdminRole>[]>(
     () => [
       { accessorKey: 'id', header: 'ID', cell: ({ row }) => <span className="text-sm text-muted-foreground">{row.original.id}</span> },
@@ -140,6 +150,9 @@ export function RoleTable({ roles, loading, onAssign, onEdit, onDelete }: RoleTa
       columns={columns}
       data={roles}
       loading={loading}
+      refreshing={refreshing}
+      onRefresh={onRefresh}
+      tools
       getRowId={(role) => String(role.id)}
       empty={<RoleEmpty />}
       renderMobileCard={(role) => (

@@ -47,6 +47,11 @@ export const NAV_SECTIONS: NavSection[] = [
               Permissions.GOODS_CATEGORY_TREE,
             ],
           },
+          {
+            label: '供应商',
+            href: '/goods/supplier',
+            permission: Permissions.SUPPLIER_PAGE,
+          },
         ],
       },
     ],

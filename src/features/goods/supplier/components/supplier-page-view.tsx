@@ -1,0 +1,116 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { Plus } from 'lucide-react'
+import { Button } from '@/components/ui/button'
+import { DataTableToolbar } from '@/components/common/data-table-toolbar'
+import { SUPPLIER_CREATE_CODES } from '../lib/supplier-permissions'
+import { useSupplierPage } from '../hooks/use-suppliers'
+import { SupplierFormDialog } from './supplier-form-dialog'
+import { SupplierPagination } from './supplier-pagination'
+import { SupplierTable } from './supplier-table'
+import type { Supplier, SupplierStatus } from '../types'
+
+type StatusFilter = 'all' | SupplierStatus
+
+export function SupplierPageView() {
+  const [keyword, setKeyword] = useState('')
+  const [query, setQuery] = useState('')
+  const [status, setStatus] = useState<StatusFilter>('all')
+  const [page, setPage] = useState(1)
+  const [pageSize, setPageSize] = useState(10)
+  const [formOpen, setFormOpen] = useState(false)
+  const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
+
+  const params = useMemo(
+    () => ({
+      page,
+      size: pageSize,
+      supplierName: query.trim() || undefined,
+      status: status === 'all' ? undefined : status,
+    }),
+    [page, pageSize, query, status],
+  )
+
+  const pageQuery = useSupplierPage(params)
+
+  const suppliers = pageQuery.data?.records ?? []
+  const total = pageQuery.data?.total ?? 0
+
+  const handleSearch = () => {
+    setPage(1)
+    setQuery(keyword)
+  }
+
+  const handleStatusChange = (value: StatusFilter) => {
+    setPage(1)
+    setStatus(value)
+  }
+
+  const handleCreate = () => {
+    setEditingSupplier(null)
+    setFormOpen(true)
+  }
+
+  const handleEdit = (supplier: Supplier) => {
+    setEditingSupplier(supplier)
+    setFormOpen(true)
+  }
+
+  const handleFormClose = () => {
+    setFormOpen(false)
+    setEditingSupplier(null)
+  }
+
+  return (
+    <div className="space-y-4">
+      <DataTableToolbar
+        searchValue={keyword}
+        onSearchChange={setKeyword}
+        onSearchSubmit={handleSearch}
+        searchPlaceholder="搜索供应商名称"
+        filters={
+          <select
+            value={status === 'all' ? 'all' : String(status)}
+            onChange={(event) =>
+              handleStatusChange(event.target.value === 'all' ? 'all' : (Number(event.target.value) as SupplierStatus))
+            }
+            className="h-9 rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
+          >
+            <option value="all">全部状态</option>
+            <option value="1">启用</option>
+            <option value="0">停用</option>
+          </select>
+        }
+        actions={
+          <Button type="button" permission={SUPPLIER_CREATE_CODES} onClick={handleCreate}>
+            <Plus className="size-4" />
+            新增供应商
+          </Button>
+        }
+        className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
+      />
+
+      <SupplierTable
+        data={suppliers}
+        loading={pageQuery.isLoading}
+        refreshing={pageQuery.isFetching}
+        onRefresh={() => pageQuery.refetch()}
+        onEdit={handleEdit}
+      />
+
+      <SupplierPagination
+        page={page}
+        pageSize={pageSize}
+        total={total}
+        onPageChange={setPage}
+        onPageSizeChange={(size) => {
+          setPageSize(size)
+          setPage(1)
+        }}
+      />
+
+      <SupplierFormDialog open={formOpen} onClose={handleFormClose} editData={editingSupplier} />
+    </div>
+  )
+}

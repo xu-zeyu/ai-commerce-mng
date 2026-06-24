@@ -34,12 +34,12 @@ request.interceptors.response.use(
   res => {
     const data = res.data
     if (data && data.code && data.code !== '200') {
-      toast.error(data.message || '请求失败')
+      toast.error(data.msg || '请求失败')
       return Promise.reject({ isBusinessError: true, data })
     }
     return data
   },
-  async (error: AxiosError<{ message?: string }>) => {
+  async (error: AxiosError<{ msg?: string }>) => {
     let message = '网络错误，请稍后重试'
     if (error.response) {
       const status = error.response.status
@@ -64,7 +64,7 @@ request.interceptors.response.use(
         503: '服务不可用',
         504: '网关超时',
       }
-      message = error.response.data?.message || map[status] || message
+      message = error.response.data?.msg || map[status] || message
     } else if (error.code === 'ECONNABORTED') {
       message = '请求超时'
     } else if (!error.response) {

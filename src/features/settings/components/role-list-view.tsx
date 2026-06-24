@@ -102,8 +102,6 @@ export function RoleListView() {
           onSearchChange={setKeyword}
           onSearchSubmit={handleSearch}
           searchPlaceholder="搜索角色名称"
-          onRefresh={() => refetch()}
-          refreshing={isFetching}
           actions={
             <>
               <Button variant="outline" permission={ROLE_MANAGE_CODES} onClick={() => setSyncOpen(true)}>
@@ -121,6 +119,8 @@ export function RoleListView() {
         <RoleTable
           roles={roles}
           loading={isLoading}
+          refreshing={isFetching}
+          onRefresh={() => refetch()}
           onAssign={handleAssign}
           onEdit={handleEdit}
           onDelete={(role) => {
