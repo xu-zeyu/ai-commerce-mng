@@ -1,11 +1,11 @@
 'use client'
 
-import { useMemo, useState, type ReactNode } from 'react'
+import { useState, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 import {
   getCoreRowModel,
   useReactTable,
   type ColumnDef,
-  type VisibilityState,
 } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
 import { DataTableContent, type DataTableDensityClass } from './data-table-content'
@@ -15,6 +15,7 @@ import {
   type DataTableToolColumn,
   type DataTableToolOptions,
 } from './data-table-tools'
+import { useDataTableColumnSettings } from './use-data-table-column-settings'
 
 interface DataTableProps<TData> {
   columns: ColumnDef<TData>[]
@@ -37,6 +38,7 @@ interface DataTableProps<TData> {
   toolExtra?: ReactNode
   onRefresh?: () => void
   refreshing?: boolean
+  settingsKey?: string
   className?: string
 }
 
@@ -86,12 +88,18 @@ export function DataTable<TData>({
   toolExtra,
   onRefresh,
   refreshing = false,
+  settingsKey,
   className,
 }: DataTableProps<TData>) {
-  const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [density, setDensity] = useState<DataTableDensity>('default')
   const [fullScreen, setFullScreen] = useState(false)
   const resolvedTools = resolveToolOptions(tools)
+  const {
+    columnVisibility,
+    updateColumnVisibility,
+    setColumnVisible,
+    resetColumnVisibility,
+  } = useDataTableColumnSettings(columns, settingsKey)
 
   // eslint-disable-next-line react-hooks/incompatible-library -- TanStack Table manages its own memoized table instance.
   const table = useReactTable({
@@ -100,32 +108,21 @@ export function DataTable<TData>({
     getCoreRowModel: getCoreRowModel(),
     getRowId,
     state: { columnVisibility },
-    onColumnVisibilityChange: setColumnVisibility,
+    onColumnVisibilityChange: updateColumnVisibility,
   })
 
-  const toolColumns = useMemo<DataTableToolColumn[]>(
-    () =>
-      table.getAllLeafColumns().map((column) => ({
-        id: column.id,
-        label: getColumnLabel(column.columnDef.header, column.id),
-        visible: column.getIsVisible(),
-        canHide: column.getCanHide(),
-      })),
-    [table],
-  )
+  const toolColumns: DataTableToolColumn[] = table.getAllLeafColumns().map((column) => ({
+    id: column.id,
+    label: getColumnLabel(column.columnDef.header, column.id),
+    visible: column.getIsVisible(),
+    canHide: column.getCanHide(),
+  }))
 
   const colSpan = table.getVisibleLeafColumns().length || 1
   const densityClass = densityClasses[density]
 
-  return (
-    <div
-      className={cn(
-        'w-full',
-        fullScreen &&
-          'fixed inset-4 z-50 overflow-auto rounded-2xl border border-border/60 bg-background p-3 shadow-md',
-        className,
-      )}
-    >
+  const content = (
+    <>
       {resolvedTools && (
         <DataTableTools
           title={toolTitle}
@@ -138,10 +135,8 @@ export function DataTable<TData>({
           onRefresh={onRefresh}
           onDensityChange={setDensity}
           onFullScreenChange={setFullScreen}
-          onColumnVisibleChange={(columnId, visible) =>
-            table.getColumn(columnId)?.toggleVisibility(visible)
-          }
-          onResetColumns={() => table.resetColumnVisibility()}
+          onColumnVisibleChange={setColumnVisible}
+          onResetColumns={resetColumnVisibility}
         />
       )}
 
@@ -157,6 +152,23 @@ export function DataTable<TData>({
         onRowClick={onRowClick}
         renderMobileCard={renderMobileCard}
       />
+    </>
+  )
+
+  if (fullScreen && typeof document !== 'undefined') {
+    return createPortal(
+      <div className="fixed inset-0 z-50 bg-background/80 p-4 backdrop-blur-sm">
+        <div className="h-full overflow-auto rounded-2xl border border-border/60 bg-background shadow-md">
+          {content}
+        </div>
+      </div>,
+      document.body,
+    )
+  }
+
+  return (
+    <div className={cn('w-full', className)}>
+      {content}
     </div>
   )
 }

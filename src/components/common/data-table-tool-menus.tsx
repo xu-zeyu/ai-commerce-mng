@@ -6,7 +6,6 @@ import {
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuRadioGroup,
   DropdownMenuRadioItem,
@@ -106,19 +105,15 @@ export function DataTableColumnMenu({
             key={column.id}
             checked={column.visible}
             disabled={!column.canHide}
-            onSelect={(event) => event.preventDefault()}
-            onCheckedChange={(checked) =>
-              onColumnVisibleChange(column.id, Boolean(checked))
-            }
+            onSelect={(event) => {
+              event.preventDefault()
+              if (!column.canHide) return
+              onColumnVisibleChange(column.id, !column.visible)
+            }}
           >
             {column.label}
           </DropdownMenuCheckboxItem>
         ))}
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={onResetColumns}>
-          <RotateCcw className="size-4" />
-          恢复默认
-        </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
   )
