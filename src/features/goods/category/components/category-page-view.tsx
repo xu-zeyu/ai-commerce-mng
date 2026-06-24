@@ -13,6 +13,7 @@ import {
 import { DataTableToolbar } from '@/components/common/data-table-toolbar'
 import { useCategoryPageStore } from '@/stores/use-category-page-store'
 import { CATEGORY_CREATE_CODES } from '../lib/category-permissions'
+import { BRAND_CREATE_CODES } from '../lib/brand-permissions'
 import {
   countEnabled,
   countTree,
@@ -23,6 +24,7 @@ import {
   MAX_CATEGORY_LEVEL,
 } from '../lib/category-tree'
 import { useCategoryPage, useCategoryTree, useDeleteCategory } from '../hooks/use-categories'
+import { useBrandPage, useDeleteBrand } from '../hooks/use-brands'
 import { CategoryBreadcrumb } from './category-breadcrumb'
 import { CategoryCardList } from './category-card-list'
 import { CategoryDeleteDialog } from './category-delete-dialog'
@@ -31,52 +33,104 @@ import { CategoryInsightChart } from './category-insight-chart'
 import { CategoryPagination } from './category-pagination'
 import { CategorySummaryCards } from './category-summary-cards'
 import { CategoryTreePanel } from './category-tree-panel'
-import type { GoodsCategory } from '../types'
+import { BrandCardList } from './brand-card-list'
+import { BrandFormDialog } from './brand-form-dialog'
+import { BrandDeleteDialog } from './brand-delete-dialog'
+import type { GoodsCategory, GoodsBrand } from '../types'
 
 export function CategoryPageView() {
-  const [keyword, setKeyword] = useState('')
-  const [query, setQuery] = useState('')
-  const [formOpen, setFormOpen] = useState(false)
-  const [editData, setEditData] = useState<GoodsCategory | null>(null)
-  const [deleteTarget, setDeleteTarget] = useState<GoodsCategory | null>(null)
+  const [catKeyword, setCatKeyword] = useState('')
+  const [catQuery, setCatQuery] = useState('')
+  const [catFormOpen, setCatFormOpen] = useState(false)
+  const [catEditData, setCatEditData] = useState<GoodsCategory | null>(null)
+  const [catDeleteTarget, setCatDeleteTarget] = useState<GoodsCategory | null>(null)
+
+  const [brandKeyword, setBrandKeyword] = useState('')
+  const [brandQuery, setBrandQuery] = useState('')
+  const [brandFormOpen, setBrandFormOpen] = useState(false)
+  const [brandEditData, setBrandEditData] = useState<GoodsBrand | null>(null)
+  const [brandDeleteTarget, setBrandDeleteTarget] = useState<GoodsBrand | null>(null)
+
   const { parentId, page, pageSize, setParentId, setPage, setPageSize } = useCategoryPageStore()
 
-  const params = useMemo(
-    () => ({ page, size: pageSize, parentId, name: query.trim() || undefined }),
-    [page, pageSize, parentId, query],
+  const catParams = useMemo(
+    () => ({ page, size: pageSize, parentId, name: catQuery.trim() || undefined }),
+    [page, pageSize, parentId, catQuery],
   )
-  const pageQuery = useCategoryPage(params)
+  const catPageQuery = useCategoryPage(catParams)
   const treeQuery = useCategoryTree()
-  const deleteMutation = useDeleteCategory()
+  const deleteCatMutation = useDeleteCategory()
 
-  const tree = treeQuery.data ?? []
-  const categories = pageQuery.data?.records ?? []
-  const total = pageQuery.data?.total ?? 0
-  const breadcrumbPath = useMemo(() => getCategoryPath(tree, parentId), [tree, parentId])
-  const metaMap = useMemo(() => createCategoryMetaMap(tree), [tree])
-  const currentParent = parentId > 0 ? findCategory(tree, parentId) : null
+  const currentParent = useMemo(() => {
+    if (parentId <= 0) return null
+    return findCategory(treeQuery.data ?? [], parentId)
+  }, [treeQuery.data, parentId])
   const isMaxLevel = currentParent ? currentParent.level >= MAX_CATEGORY_LEVEL : false
 
-  const handleSearch = () => {
+  const brandParams = useMemo(
+    () => ({
+      page,
+      size: pageSize,
+      categoryId: isMaxLevel ? currentParent!.id : parentId,
+      name: brandQuery.trim() || undefined,
+    }),
+    [page, pageSize, isMaxLevel, currentParent, parentId, brandQuery],
+  )
+  const brandPageQuery = useBrandPage(brandParams)
+  const deleteBrandMutation = useDeleteBrand()
+
+  const tree = useMemo(() => treeQuery.data ?? [], [treeQuery.data])
+  const breadcrumbPath = useMemo(() => getCategoryPath(tree, parentId), [tree, parentId])
+  const metaMap = useMemo(() => createCategoryMetaMap(tree), [tree])
+
+  const categories = catPageQuery.data?.records ?? []
+  const catTotal = catPageQuery.data?.total ?? 0
+
+  const brands = brandPageQuery.data?.records ?? []
+  const brandTotal = brandPageQuery.data?.total ?? 0
+
+  const handleCatSearch = () => {
     setPage(1)
-    setQuery(keyword)
+    setCatQuery(catKeyword)
   }
 
-  const handleCreate = () => {
-    setEditData(null)
-    setFormOpen(true)
+  const handleCatCreate = () => {
+    setCatEditData(null)
+    setCatFormOpen(true)
   }
 
-  const handleEdit = (category: GoodsCategory) => {
-    setEditData(category)
-    setFormOpen(true)
+  const handleCatEdit = (category: GoodsCategory) => {
+    setCatEditData(category)
+    setCatFormOpen(true)
   }
 
-  const handleDelete = async () => {
-    if (!deleteTarget) return
-    await deleteMutation.mutateAsync(deleteTarget.id)
+  const handleCatDelete = async () => {
+    if (!catDeleteTarget) return
+    await deleteCatMutation.mutateAsync(catDeleteTarget.id)
     toast.success('分类删除成功')
-    setDeleteTarget(null)
+    setCatDeleteTarget(null)
+  }
+
+  const handleBrandSearch = () => {
+    setPage(1)
+    setBrandQuery(brandKeyword)
+  }
+
+  const handleBrandCreate = () => {
+    setBrandEditData(null)
+    setBrandFormOpen(true)
+  }
+
+  const handleBrandEdit = (brand: GoodsBrand) => {
+    setBrandEditData(brand)
+    setBrandFormOpen(true)
+  }
+
+  const handleBrandDelete = async () => {
+    if (!brandDeleteTarget) return
+    await deleteBrandMutation.mutateAsync(brandDeleteTarget.id)
+    toast.success('品牌删除成功')
+    setBrandDeleteTarget(null)
   }
 
   const handleNavigate = (id: number) => {
@@ -100,75 +154,139 @@ export function CategoryPageView() {
         </div>
 
         <section className="min-w-0 space-y-4">
-          <DataTableToolbar
-            searchValue={keyword}
-            onSearchChange={setKeyword}
-            onSearchSubmit={handleSearch}
-            searchPlaceholder="搜索分类名称"
-            onRefresh={() => {
-              pageQuery.refetch()
-              treeQuery.refetch()
-            }}
-            refreshing={pageQuery.isFetching || treeQuery.isFetching}
-            actions={
-              isMaxLevel ? (
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <span>
-                        <Button permission={CATEGORY_CREATE_CODES} disabled onClick={handleCreate}>
-                          <Plus className="size-4" />
-                          新增
-                        </Button>
-                      </span>
-                    </TooltipTrigger>
-                    <TooltipContent>分类层级已达上限（最多 3 级），无法继续新增子级</TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              ) : (
-                <Button permission={CATEGORY_CREATE_CODES} onClick={handleCreate}>
+          {isMaxLevel ? (
+            <DataTableToolbar
+              searchValue={brandKeyword}
+              onSearchChange={setBrandKeyword}
+              onSearchSubmit={handleBrandSearch}
+              searchPlaceholder="搜索品牌名称"
+              onRefresh={() => brandPageQuery.refetch()}
+              refreshing={brandPageQuery.isFetching}
+              actions={
+                <Button permission={BRAND_CREATE_CODES} onClick={handleBrandCreate}>
                   <Plus className="size-4" />
-                  新增
+                  新增品牌
                 </Button>
-              )
-            }
-            className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
+              }
+              className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
+            />
+          ) : (
+            <DataTableToolbar
+              searchValue={catKeyword}
+              onSearchChange={setCatKeyword}
+              onSearchSubmit={handleCatSearch}
+              searchPlaceholder="搜索分类名称"
+              onRefresh={() => {
+                catPageQuery.refetch()
+                treeQuery.refetch()
+              }}
+              refreshing={catPageQuery.isFetching || treeQuery.isFetching}
+              actions={
+                isMaxLevel ? (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span>
+                          <Button permission={CATEGORY_CREATE_CODES} disabled onClick={handleCatCreate}>
+                            <Plus className="size-4" />
+                            新增
+                          </Button>
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>分类层级已达上限（最多 3 级），无法继续新增子级</TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                ) : (
+                  <Button permission={CATEGORY_CREATE_CODES} onClick={handleCatCreate}>
+                    <Plus className="size-4" />
+                    新增
+                  </Button>
+                )
+              }
+              className="rounded-2xl border border-border/60 border-b-border/60 bg-card/80 p-3 shadow-sm backdrop-blur-xl dark:bg-card/70 sm:p-4"
+            />
+          )}
+
+          <CategoryBreadcrumb
+            path={breadcrumbPath}
+            total={isMaxLevel ? brandTotal : catTotal}
+            onNavigate={handleNavigate}
           />
-          <CategoryBreadcrumb path={breadcrumbPath} total={total} onNavigate={handleNavigate} />
-          <CategoryCardList
-            categories={categories}
-            loading={pageQuery.isLoading}
-            metaMap={metaMap}
-            onEdit={handleEdit}
-            onDelete={setDeleteTarget}
-            onDrillDown={handleNavigate}
-          />
-          <CategoryPagination
-            page={page}
-            pageSize={pageSize}
-            total={total}
-            onPageChange={setPage}
-            onPageSizeChange={setPageSize}
-          />
+
+          {isMaxLevel ? (
+            <>
+              <BrandCardList
+                brands={brands}
+                loading={brandPageQuery.isLoading}
+                onEdit={handleBrandEdit}
+                onDelete={setBrandDeleteTarget}
+              />
+              <CategoryPagination
+                page={page}
+                pageSize={pageSize}
+                total={brandTotal}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+              />
+            </>
+          ) : (
+            <>
+              <CategoryCardList
+                categories={categories}
+                loading={catPageQuery.isLoading}
+                metaMap={metaMap}
+                onEdit={handleCatEdit}
+                onDelete={setCatDeleteTarget}
+                onDrillDown={handleNavigate}
+              />
+              <CategoryPagination
+                page={page}
+                pageSize={pageSize}
+                total={catTotal}
+                onPageChange={setPage}
+                onPageSizeChange={setPageSize}
+              />
+            </>
+          )}
         </section>
       </div>
 
       <CategoryFormDialog
-        open={formOpen}
+        open={catFormOpen}
         onClose={() => {
-          setFormOpen(false)
-          setEditData(null)
+          setCatFormOpen(false)
+          setCatEditData(null)
         }}
         tree={tree}
-        editData={editData}
+        editData={catEditData}
         initialParentId={parentId}
       />
       <CategoryDeleteDialog
-        category={deleteTarget}
-        loading={deleteMutation.isPending}
-        onClose={() => setDeleteTarget(null)}
-        onConfirm={handleDelete}
+        category={catDeleteTarget}
+        loading={deleteCatMutation.isPending}
+        onClose={() => setCatDeleteTarget(null)}
+        onConfirm={handleCatDelete}
       />
+
+      {isMaxLevel && (
+        <>
+          <BrandFormDialog
+            open={brandFormOpen}
+            onClose={() => {
+              setBrandFormOpen(false)
+              setBrandEditData(null)
+            }}
+            category={currentParent}
+            editData={brandEditData}
+          />
+          <BrandDeleteDialog
+            brand={brandDeleteTarget}
+            loading={deleteBrandMutation.isPending}
+            onClose={() => setBrandDeleteTarget(null)}
+            onConfirm={handleBrandDelete}
+          />
+        </>
+      )}
     </div>
   )
 }

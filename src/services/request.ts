@@ -2,7 +2,7 @@ import axios, { AxiosError, type AxiosRequestConfig, type InternalAxiosRequestCo
 import { toast } from 'sonner'
 import { API_BASE_URL } from './env'
 
-const PUBLIC_PATHS = ['/login/sms', '/public/captcha']
+const PUBLIC_PATHS = ['/login/sms', '/public/captcha', '/public/file/upload', '/public/file/batchUpload']
 
 const isPublic = (url: string) => PUBLIC_PATHS.some(p => url.includes(p))
 

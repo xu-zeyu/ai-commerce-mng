@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
+import { FileUpload } from '@/features/file/components/file-upload'
 import { CATEGORY_CREATE_CODES, CATEGORY_MUTATE_CODES } from '../lib/category-permissions'
 import { findCategory, flattenCategoryTree, MAX_CATEGORY_LEVEL } from '../lib/category-tree'
 import { categorySchema, type CategoryFormValues } from '../schemas/category-schema'
@@ -40,6 +41,7 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
     register,
     handleSubmit,
     reset,
+    setValue,
     control,
     formState: { errors },
   } = useForm<CategoryFormValues>({
@@ -49,6 +51,7 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
 
   const parentId = useWatch({ control, name: 'parentId' })
   const iconValue = useWatch({ control, name: 'icon' })
+  const uploadedIconValue = iconValue.startsWith('http') || iconValue.startsWith('/') ? [iconValue] : []
   const selectedParent = parentId > 0 ? findCategory(tree, parentId) : null
   const level = selectedParent ? selectedParent.level + 1 : 1
   const loading = create.isPending || update.isPending
@@ -131,6 +134,21 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
                 <CategoryIcon value={iconValue} name="分类" className="size-10 shrink-0" />
                 <Input id="icon" placeholder="📦 或 PNG 图片地址" disabled={loading} {...register('icon')} />
               </div>
+              <FileUpload
+                value={uploadedIconValue}
+                onChange={(urls) =>
+                  setValue('icon', urls[0] ?? '', {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
+                accept="image/jpeg,image/png,image/webp"
+                maxFiles={1}
+                maxSizeMb={5}
+                disabled={loading}
+                emptyTitle="上传分类图片"
+                emptyDescription="JPG、PNG、WebP · 上传后自动填入地址"
+              />
               {errors.icon && <p className="text-xs text-destructive">{errors.icon.message}</p>}
             </div>
 
