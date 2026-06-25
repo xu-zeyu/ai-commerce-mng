@@ -15,3 +15,19 @@ export const SUPPLIER_UPDATE_CODES = [
 export const SUPPLIER_DELETE_CODES = [
   Permissions.SUPPLIER_DELETE,
 ] as const
+
+export const SUPPLIER_BRAND_VIEW_CODES = [
+  Permissions.SUPPLIER_BRAND_PAGE,
+] as const
+
+export const SUPPLIER_BRAND_CREATE_CODES = [
+  Permissions.SUPPLIER_BRAND_CREATE,
+] as const
+
+export const SUPPLIER_BRAND_UPDATE_CODES = [
+  Permissions.SUPPLIER_BRAND_UPDATE,
+] as const
+
+export const SUPPLIER_BRAND_DELETE_CODES = [
+  Permissions.SUPPLIER_BRAND_DELETE,
+] as const

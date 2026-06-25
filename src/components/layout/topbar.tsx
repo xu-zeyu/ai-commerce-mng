@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation'
 import { Moon, Sun, LogOut, User } from 'lucide-react'
 import { useTheme } from 'next-themes'
-import { Avatar, AvatarFallback } from '@/components/ui/avatar'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
 import {
   DropdownMenu,
@@ -43,6 +43,9 @@ export function Topbar() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-2 rounded-2xl px-2 py-1 transition-colors hover:bg-accent">
             <Avatar className="size-8">
+              {user?.avatar ? (
+                <AvatarImage src={user.avatar} alt={user?.userName ?? '头像'} />
+              ) : null}
               <AvatarFallback className="bg-primary/10 text-primary text-xs font-semibold">
                 {initials}
               </AvatarFallback>

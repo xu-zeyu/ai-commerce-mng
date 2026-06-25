@@ -18,6 +18,7 @@ import { useDeleteSupplier, useSupplierPage } from '../hooks/use-suppliers'
 import { SupplierFormDialog } from './supplier-form-dialog'
 import { SupplierPagination } from './supplier-pagination'
 import { SupplierTable } from './supplier-table'
+import { SupplierBrandSheet } from './supplier-brand-sheet'
 import type { Supplier, SupplierStatus } from '../types'
 
 type StatusFilter = 'all' | SupplierStatus
@@ -31,6 +32,7 @@ export function SupplierPageView() {
   const [formOpen, setFormOpen] = useState(false)
   const [editingSupplier, setEditingSupplier] = useState<Supplier | null>(null)
   const [deletingSupplier, setDeletingSupplier] = useState<Supplier | null>(null)
+  const [brandSheetSupplier, setBrandSheetSupplier] = useState<Supplier | null>(null)
 
   const deleteMutation = useDeleteSupplier()
 
@@ -127,6 +129,7 @@ export function SupplierPageView() {
         onRefresh={() => pageQuery.refetch()}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onManageBrands={setBrandSheetSupplier}
       />
 
       <SupplierPagination
@@ -141,6 +144,12 @@ export function SupplierPageView() {
       />
 
       <SupplierFormDialog open={formOpen} onClose={handleFormClose} editData={editingSupplier} />
+
+      <SupplierBrandSheet
+        open={!!brandSheetSupplier}
+        onClose={() => setBrandSheetSupplier(null)}
+        supplier={brandSheetSupplier}
+      />
 
       <Dialog open={!!deletingSupplier} onOpenChange={() => setDeletingSupplier(null)}>
         <DialogContent>

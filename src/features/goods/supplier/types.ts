@@ -53,3 +53,36 @@ export interface CreateSupplierPayload {
 }
 
 export type UpdateSupplierPayload = CreateSupplierPayload
+
+// ---------- 供应商品牌关系 ----------
+
+export interface SupplierBrand {
+  id: number
+  /** 供应商ID */
+  supplierId: number
+  /** 品牌ID */
+  brandId: number
+  /** 品牌名称（前端映射） */
+  brandName?: string
+  createdTime?: string
+}
+
+export interface SupplierBrandPageParams {
+  page: number
+  size: number
+  supplierId?: number
+  brandId?: number
+}
+
+export interface SupplierBrandPageResult {
+  records: SupplierBrand[]
+  total: number
+  size: number
+  current: number
+  pages?: number
+}
+
+export interface CreateSupplierBrandPayload {
+  supplierId: number
+  brandId: number
+}

@@ -52,6 +52,16 @@ export const ADMIN_PERMISSION_MODULES: PermissionModule[] = [
           { code: Permissions.SUPPLIER_DELETE, label: '删除供应商' },
         ],
       },
+      {
+        code: 'SUPPLIER_BRAND',
+        label: '供应商品牌',
+        actions: [
+          { code: Permissions.SUPPLIER_BRAND_CREATE, label: '新增品牌关系' },
+          { code: Permissions.SUPPLIER_BRAND_PAGE, label: '分页列表' },
+          { code: Permissions.SUPPLIER_BRAND_UPDATE, label: '编辑品牌关系' },
+          { code: Permissions.SUPPLIER_BRAND_DELETE, label: '删除品牌关系' },
+        ],
+      },
     ],
   },
 ]

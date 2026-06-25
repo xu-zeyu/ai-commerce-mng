@@ -2,11 +2,15 @@
 
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Edit3, Trash2 } from 'lucide-react'
+import { Edit3, Package, Trash2 } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/common/data-table'
-import { SUPPLIER_DELETE_CODES, SUPPLIER_UPDATE_CODES } from '../lib/supplier-permissions'
+import {
+  SUPPLIER_BRAND_CREATE_CODES,
+  SUPPLIER_DELETE_CODES,
+  SUPPLIER_UPDATE_CODES,
+} from '../lib/supplier-permissions'
 import type { Supplier } from '../types'
 
 interface Props {
@@ -16,6 +20,7 @@ interface Props {
   onEdit: (supplier: Supplier) => void
   onDelete: (supplier: Supplier) => void
   onRefresh?: () => void
+  onManageBrands?: (supplier: Supplier) => void
 }
 
 function StatusBadge({ status }: { status: Supplier['status'] }) {
@@ -30,7 +35,7 @@ function formatDate(value?: string) {
   return value ? value.slice(0, 10) : '—'
 }
 
-export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onRefresh }: Props) {
+export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onRefresh, onManageBrands }: Props) {
   const columns = useMemo<ColumnDef<Supplier>[]>(
     () => [
       {
@@ -84,6 +89,19 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onR
         header: '操作',
         cell: ({ row }) => (
           <div className="flex items-center gap-1">
+            {onManageBrands && (
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                permission={SUPPLIER_BRAND_CREATE_CODES}
+                onClick={() => onManageBrands(row.original)}
+              >
+                <Package className="size-3.5" />
+                品牌
+              </Button>
+            )}
             <Button
               type="button"
               variant="ghost"
@@ -110,7 +128,7 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onR
         ),
       },
     ],
-    [onEdit, onDelete],
+    [onEdit, onDelete, onManageBrands],
   )
 
   return (
@@ -160,6 +178,19 @@ export function SupplierTable({ data, loading, refreshing, onEdit, onDelete, onR
               </div>
             </dl>
             <div className="flex items-center justify-end gap-1 pt-1">
+              {onManageBrands && (
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                  permission={SUPPLIER_BRAND_CREATE_CODES}
+                  onClick={() => onManageBrands(row)}
+                >
+                  <Package className="size-3.5" />
+                  品牌
+                </Button>
+              )}
               <Button
                 type="button"
                 variant="ghost"
