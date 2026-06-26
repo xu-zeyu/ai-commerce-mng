@@ -57,6 +57,11 @@ export const NAV_SECTIONS: NavSection[] = [
             href: '/goods/brand',
             permission: Permissions.GOODS_BRAND_PAGE,
           },
+          {
+            label: '商品列表',
+            href: '/goods/product',
+            permission: Permissions.PRODUCT_SPU_PAGE,
+          },
         ],
       },
     ],

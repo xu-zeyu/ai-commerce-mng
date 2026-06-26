@@ -71,7 +71,6 @@ export interface CreateProductPayload {
   categoryId: number
   brandId: number
   saleStatus: SaleStatus
-  auditStatus: AuditStatus
   sort?: number
   salesCount?: number
 }

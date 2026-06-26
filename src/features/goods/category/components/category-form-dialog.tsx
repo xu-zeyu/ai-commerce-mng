@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { SelectControl } from '@/components/common/select-control'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -51,6 +52,7 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
 
   const parentId = useWatch({ control, name: 'parentId' })
   const iconValue = useWatch({ control, name: 'icon' })
+  const statusValue = useWatch({ control, name: 'status' })
   const uploadedIconValue = iconValue.startsWith('http') || iconValue.startsWith('/') ? [iconValue] : []
   const selectedParent = parentId > 0 ? findCategory(tree, parentId) : null
   const level = selectedParent ? selectedParent.level + 1 : 1
@@ -113,19 +115,24 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
 
             <div className="space-y-2 sm:col-span-2">
               <Label htmlFor="parentId">父级分类</Label>
-              <select
+              <SelectControl
                 id="parentId"
+                value={String(parentId ?? 0)}
+                onValueChange={(value) =>
+                  setValue('parentId', Number(value), {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
                 disabled={loading}
-                className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                {...register('parentId')}
-              >
-                <option value={0}>一级分类</option>
-                {parentOptions.map((item) => (
-                  <option key={item.id} value={item.id}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
+                options={[
+                  { value: '0', label: '一级分类' },
+                  ...parentOptions.map((item) => ({
+                    value: String(item.id),
+                    label: item.label,
+                  })),
+                ]}
+              />
             </div>
 
             <div className="space-y-2">
@@ -160,15 +167,21 @@ export function CategoryFormDialog({ open, onClose, tree, editData, initialParen
 
             <div className="space-y-2">
               <Label htmlFor="status">状态</Label>
-              <select
+              <SelectControl
                 id="status"
+                value={String(statusValue ?? 1)}
+                onValueChange={(value) =>
+                  setValue('status', Number(value) as 0 | 1, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
                 disabled={loading}
-                className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                {...register('status')}
-              >
-                <option value={1}>启用</option>
-                <option value={0}>停用</option>
-              </select>
+                options={[
+                  { value: '1', label: '启用' },
+                  { value: '0', label: '停用' },
+                ]}
+              />
             </div>
 
             <div className="space-y-2">

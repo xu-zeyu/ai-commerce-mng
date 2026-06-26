@@ -19,6 +19,7 @@ import { SupplierFormDialog } from './supplier-form-dialog'
 import { SupplierPagination } from './supplier-pagination'
 import { SupplierTable } from './supplier-table'
 import { SupplierBrandSheet } from './supplier-brand-sheet'
+import { SupplierFilterFields } from './supplier-filter-fields'
 import type { Supplier, SupplierStatus } from '../types'
 
 type StatusFilter = 'all' | SupplierStatus
@@ -54,6 +55,13 @@ export function SupplierPageView() {
   const handleSearch = () => {
     setPage(1)
     setQuery(keyword)
+  }
+
+  const handleReset = () => {
+    setKeyword('')
+    setQuery('')
+    setStatus('all')
+    setPage(1)
   }
 
   const handleStatusChange = (value: StatusFilter) => {
@@ -93,6 +101,8 @@ export function SupplierPageView() {
     })
   }
 
+  const hasActiveFilters = Boolean(keyword || query) || status !== 'all'
+
   return (
     <div className="space-y-4">
       <DataTableToolbar
@@ -100,19 +110,9 @@ export function SupplierPageView() {
         onSearchChange={setKeyword}
         onSearchSubmit={handleSearch}
         searchPlaceholder="搜索供应商名称"
-        filters={
-          <select
-            value={status === 'all' ? 'all' : String(status)}
-            onChange={(event) =>
-              handleStatusChange(event.target.value === 'all' ? 'all' : (Number(event.target.value) as SupplierStatus))
-            }
-            className="h-9 rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-          >
-            <option value="all">全部状态</option>
-            <option value="1">启用</option>
-            <option value="0">停用</option>
-          </select>
-        }
+        onReset={handleReset}
+        resetDisabled={!hasActiveFilters}
+        filters={<SupplierFilterFields status={status} onStatusChange={handleStatusChange} />}
         actions={
           <Button type="button" permission={SUPPLIER_CREATE_CODES} onClick={handleCreate}>
             <Plus className="size-4" />

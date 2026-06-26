@@ -2,6 +2,13 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface RolePaginationProps {
   page: number
@@ -30,17 +37,18 @@ export function RolePagination({
         共 {total} 条，当前 {start}-{end}
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSizeChange(Number(event.target.value))}
-          className="h-9 rounded-xl border border-input bg-background px-3 text-sm outline-none focus:ring-2 focus:ring-ring"
-        >
+        <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+          <SelectTrigger className="h-9 w-28">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
           {PAGE_SIZE_OPTIONS.map((option) => (
-            <option key={option} value={option}>
+            <SelectItem key={option} value={String(option)}>
               {option} 条/页
-            </option>
+            </SelectItem>
           ))}
-        </select>
+          </SelectContent>
+        </Select>
         <Button
           type="button"
           variant="outline"

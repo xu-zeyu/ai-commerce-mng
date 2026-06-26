@@ -6,6 +6,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { Loader2 } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
+import { SelectControl } from '@/components/common/select-control'
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
@@ -42,6 +43,7 @@ export function BrandFormDialog({ open, onClose, category, editData }: Props) {
   })
 
   const logoValue = useWatch({ control, name: 'logo' })
+  const statusValue = useWatch({ control, name: 'status' })
   const uploadedLogoValue = logoValue?.startsWith('http') || logoValue?.startsWith('/') ? [logoValue] : []
 
   useEffect(() => {
@@ -139,15 +141,21 @@ export function BrandFormDialog({ open, onClose, category, editData }: Props) {
 
             <div className="space-y-2">
               <Label htmlFor="brand-status">状态</Label>
-              <select
+              <SelectControl
                 id="brand-status"
+                value={String(statusValue ?? 1)}
+                onValueChange={(value) =>
+                  setValue('status', Number(value) as 0 | 1, {
+                    shouldDirty: true,
+                    shouldValidate: true,
+                  })
+                }
                 disabled={loading}
-                className="h-10 w-full rounded-xl border border-input bg-background px-3 text-sm outline-none transition-colors focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
-                {...register('status')}
-              >
-                <option value={1}>启用</option>
-                <option value={0}>停用</option>
-              </select>
+                options={[
+                  { value: '1', label: '启用' },
+                  { value: '0', label: '停用' },
+                ]}
+              />
             </div>
 
             <div className="space-y-2">

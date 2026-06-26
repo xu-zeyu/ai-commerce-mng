@@ -9,29 +9,13 @@ import { BRAND_CREATE_CODES } from '../lib/brand-permissions'
 import { useBrandPage, useDeleteBrand } from '../hooks/use-brands'
 import { useCategoryTree } from '../hooks/use-category-tree'
 import type { GoodsBrand, BrandStatus } from '../types'
-import type { CategoryTreeNode } from '../api/get-category-tree'
 import { BrandCardList } from './brand-card-list'
 import { BrandFormDialog } from './brand-form-dialog'
 import { BrandDeleteDialog } from './brand-delete-dialog'
 import { BrandPagination } from './brand-pagination'
+import { BrandFilterFields, flattenCategoryTree } from './brand-filter-fields'
 
 type StatusFilter = 'all' | BrandStatus
-
-/** 将分类树拍平为可选列表 */
-function flattenCategoryTree(
-  nodes: CategoryTreeNode[],
-  parentPath = '',
-): { id: number; label: string }[] {
-  const result: { id: number; label: string }[] = []
-  for (const node of nodes) {
-    const path = parentPath ? `${parentPath} > ${node.name}` : node.name
-    result.push({ id: node.id, label: path })
-    if (node.children && node.children.length > 0) {
-      result.push(...flattenCategoryTree(node.children, path))
-    }
-  }
-  return result
-}
 
 export function BrandPageView() {
   const [keyword, setKeyword] = useState('')
@@ -47,8 +31,10 @@ export function BrandPageView() {
   const treeQuery = useCategoryTree()
   const deleteMutation = useDeleteBrand()
 
-  const tree = treeQuery.data ?? []
-  const flatCategories = useMemo(() => flattenCategoryTree(tree), [tree])
+  const flatCategories = useMemo(
+    () => flattenCategoryTree(treeQuery.data ?? []),
+    [treeQuery.data],
+  )
 
   const params = useMemo(
     () => ({
@@ -68,6 +54,14 @@ export function BrandPageView() {
   const handleSearch = () => {
     setPage(1)
     setQuery(keyword)
+  }
+
+  const handleReset = () => {
+    setKeyword('')
+    setQuery('')
+    setStatus('all')
+    setCategoryId(0)
+    setPage(1)
   }
 
   const handleStatusChange = (value: StatusFilter) => {
@@ -101,6 +95,9 @@ export function BrandPageView() {
     setDeleteTarget(null)
   }
 
+  const hasActiveFilters =
+    Boolean(keyword || query) || categoryId > 0 || status !== 'all'
+
   return (
     <div className="space-y-4">
       <DataTableToolbar
@@ -108,41 +105,21 @@ export function BrandPageView() {
         onSearchChange={setKeyword}
         onSearchSubmit={handleSearch}
         searchPlaceholder="搜索品牌名称"
+        onReset={handleReset}
+        resetDisabled={!hasActiveFilters}
         onRefresh={() => {
           pageQuery.refetch()
           treeQuery.refetch()
         }}
         refreshing={pageQuery.isFetching}
         filters={
-          <div className="flex items-center gap-2">
-            <select
-              value={categoryId}
-              onChange={(event) => handleCategoryChange(event.target.value)}
-              className="h-9 rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value={0}>全部分类</option>
-              {flatCategories.map((cat) => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.label}
-                </option>
-              ))}
-            </select>
-            <select
-              value={status}
-              onChange={(event) =>
-                handleStatusChange(
-                  event.target.value === 'all'
-                    ? 'all'
-                    : (Number(event.target.value) as BrandStatus),
-                )
-              }
-              className="h-9 rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-            >
-              <option value="all">全部状态</option>
-              <option value="1">启用</option>
-              <option value="0">停用</option>
-            </select>
-          </div>
+          <BrandFilterFields
+            categoryId={categoryId}
+            status={status}
+            categories={flatCategories}
+            onCategoryChange={handleCategoryChange}
+            onStatusChange={handleStatusChange}
+          />
         }
         actions={
           <Button type="button" permission={BRAND_CREATE_CODES} onClick={handleCreate}>

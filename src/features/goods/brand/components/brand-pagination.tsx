@@ -2,6 +2,13 @@
 
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
 
 interface Props {
   page: number
@@ -26,17 +33,18 @@ export function BrandPagination({
         共 {total} 个品牌，第 {page} / {pageCount} 页
       </p>
       <div className="flex flex-wrap items-center gap-2">
-        <select
-          value={pageSize}
-          onChange={(event) => onPageSizeChange(Number(event.target.value))}
-          className="h-9 rounded-xl border border-input bg-card px-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-ring"
-        >
+        <Select value={String(pageSize)} onValueChange={(value) => onPageSizeChange(Number(value))}>
+          <SelectTrigger className="h-9 w-28 bg-card/70">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
           {[12, 24, 36, 48].map((value) => (
-            <option key={value} value={value}>
+            <SelectItem key={value} value={String(value)}>
               {value} / 页
-            </option>
+            </SelectItem>
           ))}
-        </select>
+          </SelectContent>
+        </Select>
         <Button
           type="button"
           variant="outline"
