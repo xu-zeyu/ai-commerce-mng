@@ -11,7 +11,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { PRODUCT_CREATE_CODES, PRODUCT_UPDATE_CODES } from '../lib/product-permissions'
-import { SALE_STATUS_OPTIONS } from '../lib/product-status'
+import { PRODUCT_FORM_SALE_STATUS_OPTIONS, toFormSaleStatus } from '../lib/product-status'
 import { productSchema, type ProductFormValues } from '../schemas/product-schema'
 import { useCreateProduct, useUpdateProduct } from '../hooks/use-products'
 import {
@@ -108,7 +108,7 @@ export function ProductFormDialog({ open, onClose, editData }: Props) {
             subTitle: editData.subTitle || '',
             categoryId: editData.categoryId,
             brandId: editData.brandId,
-            saleStatus: editData.saleStatus,
+            saleStatus: toFormSaleStatus(editData.saleStatus),
             sort: editData.sort ?? 0,
             salesCount: editData.salesCount ?? 0,
           }
@@ -271,7 +271,7 @@ export function ProductFormDialog({ open, onClose, editData }: Props) {
                 value={String(saleStatusValue ?? 1)}
                 onValueChange={(value) => setNumberField('saleStatus', value)}
                 disabled={loading}
-                options={SALE_STATUS_OPTIONS.map((opt) => ({
+                options={PRODUCT_FORM_SALE_STATUS_OPTIONS.map((opt) => ({
                   value: String(opt.value),
                   label: opt.label,
                 }))}

@@ -3,3 +3,4 @@ import { ProductPageView } from '@/features/goods/product/components/product-pag
 export default function GoodsProductPage() {
   return <ProductPageView />
 }
+

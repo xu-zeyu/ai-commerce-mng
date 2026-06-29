@@ -109,7 +109,7 @@ export function ProductFilterFields({
             onSaleStatusChange(
               value === 'all'
                 ? 'all'
-                : (Number(value) as SaleStatus),
+                : (value as SaleStatus),
             )
           }
           options={[
@@ -129,7 +129,7 @@ export function ProductFilterFields({
             onAuditStatusChange(
               value === 'all'
                 ? 'all'
-                : (Number(value) as AuditStatus),
+                : (value as AuditStatus),
             )
           }
           options={[

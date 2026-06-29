@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { getSupplierBrandPage } from '@/features/goods/supplier/api/get-supplier-brand-page'
 import { getAllBrands } from '@/features/goods/supplier/api/get-all-brands'
@@ -18,8 +18,6 @@ interface SupplierBrandAutoFill {
  * 品牌和分类由此 hook 驱动，表单中禁用手动修改。
  */
 export function useSupplierBrandAutoFill(supplierId: number): SupplierBrandAutoFill {
-  const [brandId, setBrandId] = useState<number | null>(null)
-
   // 供应商有品牌时才启用
   const supplierBrandQuery = useQuery({
     queryKey: ['supplier-brand-page', supplierId],
@@ -48,28 +46,17 @@ export function useSupplierBrandAutoFill(supplierId: number): SupplierBrandAutoF
       .map((b) => ({ id: b.id, label: b.name }))
   }, [allBrandsQuery.data, supplierBrandIds])
 
-  // 当品牌选项加载完成后，自动选中第一个
-  useEffect(() => {
-    if (brandOptions.length > 0) {
-      setBrandId((prev) => {
-        // 已经选中的品牌仍在列表中，不重复设置
-        if (prev && brandOptions.some((b) => b.id === prev)) return prev
-        return brandOptions[0].id
-      })
-    } else {
-      setBrandId(null)
-    }
-  }, [brandOptions])
+  const firstBrandId = brandOptions[0]?.id ?? null
 
   // 从全量品牌数据中找到第一个品牌的 categoryId
   const firstCategoryId = useMemo(() => {
-    if (!brandId) return null
+    if (!firstBrandId) return null
     const all = allBrandsQuery.data ?? []
-    const found = all.find((b) => b.id === brandId)
+    const found = all.find((b) => b.id === firstBrandId)
     return found?.categoryId ?? null
-  }, [brandId, allBrandsQuery.data])
+  }, [firstBrandId, allBrandsQuery.data])
 
   const isLoading = supplierBrandQuery.isLoading || allBrandsQuery.isLoading
 
-  return { brandOptions, firstBrandId: brandId, firstCategoryId, isLoading }
+  return { brandOptions, firstBrandId, firstCategoryId, isLoading }
 }

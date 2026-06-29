@@ -25,7 +25,9 @@ interface Props {
 
 function SaleBadge({ status }: { status: ProductSpu['saleStatus'] }) {
   return (
-    <Badge variant={status === 1 ? 'default' : 'secondary'}>{SALE_STATUS_LABEL[status]}</Badge>
+    <Badge variant={status === 'ON_SHELF' ? 'default' : 'secondary'}>
+      {SALE_STATUS_LABEL[status]}
+    </Badge>
   )
 }
 

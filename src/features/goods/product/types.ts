@@ -1,8 +1,11 @@
-/** 销售状态：0-下架 1-上架 */
-export type SaleStatus = 0 | 1
+/** 商品分页销售状态 */
+export type SaleStatus = 'OFF_SHELF' | 'ON_SHELF'
 
-/** 审核状态：0-待审核 1-审核通过 2-审核拒绝 */
-export type AuditStatus = 0 | 1 | 2
+/** 商品分页审核状态 */
+export type AuditStatus = 'PENDING' | 'PASS' | 'REJECT'
+
+/** 创建/编辑商品销售状态：0-下架 1-上架 */
+export type ProductFormSaleStatus = 0 | 1
 
 export interface ProductSpu {
   id: number
@@ -24,9 +27,9 @@ export interface ProductSpu {
   brandId: number
   /** 品牌名称（前端映射） */
   brandName?: string | null
-  /** 销售状态：0-下架 1-上架 */
+  /** 销售状态：OFF_SHELF-下架 ON_SHELF-上架 */
   saleStatus: SaleStatus
-  /** 审核状态：0-待审核 1-审核通过 2-审核拒绝 */
+  /** 审核状态：PENDING-待审核 PASS-审核通过 REJECT-审核拒绝 */
   auditStatus: AuditStatus
   /** 排序值 */
   sort?: number | null
@@ -70,7 +73,7 @@ export interface CreateProductPayload {
   subTitle?: string
   categoryId: number
   brandId: number
-  saleStatus: SaleStatus
+  saleStatus: ProductFormSaleStatus
   sort?: number
   salesCount?: number
 }
