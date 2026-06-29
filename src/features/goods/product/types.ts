@@ -33,8 +33,6 @@ export interface ProductSpu {
   auditStatus: AuditStatus
   /** 排序值 */
   sort?: number | null
-  /** 销量 */
-  salesCount?: number | null
   createdTime?: string
   updatedTime?: string
 }
@@ -75,7 +73,6 @@ export interface CreateProductPayload {
   brandId: number
   saleStatus: ProductFormSaleStatus
   sort?: number
-  salesCount?: number
 }
 
 export type UpdateProductPayload = CreateProductPayload

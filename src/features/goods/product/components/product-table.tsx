@@ -71,13 +71,6 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
         cell: ({ row }) => row.original.supplierName || '—',
       },
       {
-        accessorKey: 'salesCount',
-        header: '销量',
-        cell: ({ row }) => (
-          <span className="tabular-nums text-muted-foreground">{row.original.salesCount ?? 0}</span>
-        ),
-      },
-      {
         accessorKey: 'saleStatus',
         header: '销售状态',
         cell: ({ row }) => <SaleBadge status={row.original.saleStatus} />,
@@ -163,10 +156,6 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
               <div className="flex justify-between gap-2">
                 <dt>供应商</dt>
                 <dd className="text-foreground">{row.supplierName || '—'}</dd>
-              </div>
-              <div className="flex justify-between gap-2">
-                <dt>销量</dt>
-                <dd className="text-foreground tabular-nums">{row.salesCount ?? 0}</dd>
               </div>
               <div className="flex justify-between gap-2">
                 <dt>创建时间</dt>

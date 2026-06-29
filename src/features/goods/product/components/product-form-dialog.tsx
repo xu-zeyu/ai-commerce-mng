@@ -37,7 +37,6 @@ const EMPTY_VALUES: ProductFormValues = {
   brandId: 0,
   saleStatus: 1,
   sort: 0,
-  salesCount: 0,
 }
 
 export function ProductFormDialog({ open, onClose, editData }: Props) {
@@ -110,7 +109,6 @@ export function ProductFormDialog({ open, onClose, editData }: Props) {
             brandId: editData.brandId,
             saleStatus: toFormSaleStatus(editData.saleStatus),
             sort: editData.sort ?? 0,
-            salesCount: editData.salesCount ?? 0,
           }
         : EMPTY_VALUES,
     )
@@ -126,7 +124,6 @@ export function ProductFormDialog({ open, onClose, editData }: Props) {
       brandId: values.brandId,
       saleStatus: values.saleStatus,
       sort: values.sort,
-      salesCount: values.salesCount,
     }
 
     if (editData) {
@@ -293,21 +290,6 @@ export function ProductFormDialog({ open, onClose, editData }: Props) {
               />
               {errors.sort && (
                 <p className="text-xs text-destructive">{errors.sort.message}</p>
-              )}
-            </div>
-
-            {/* 销量 */}
-            <div className="space-y-2">
-              <Label htmlFor="product-salesCount">销量</Label>
-              <Input
-                id="product-salesCount"
-                type="number"
-                min={0}
-                disabled={loading}
-                {...register('salesCount')}
-              />
-              {errors.salesCount && (
-                <p className="text-xs text-destructive">{errors.salesCount.message}</p>
               )}
             </div>
           </div>

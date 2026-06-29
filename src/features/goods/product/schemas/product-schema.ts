@@ -12,7 +12,6 @@ export const productSchema = z.object({
   brandId: z.coerce.number().int().positive('请选择品牌'),
   saleStatus: z.coerce.number().pipe(z.union([z.literal(0), z.literal(1)])),
   sort: z.coerce.number().int('排序需为整数').min(0, '排序不能小于 0').max(99999, '排序值过大'),
-  salesCount: z.coerce.number().int('销量需为整数').min(0, '销量不能小于 0'),
 })
 
 export type ProductFormValues = z.infer<typeof productSchema>
