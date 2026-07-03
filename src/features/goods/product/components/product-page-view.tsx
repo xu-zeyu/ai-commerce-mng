@@ -17,7 +17,9 @@ import { ProductTable } from './product-table'
 import { ProductPagination } from './product-pagination'
 import { ProductFormDialog } from './product-form-dialog'
 import { ProductDeleteDialog } from './product-delete-dialog'
+import { ProductImageManager } from './product-image-manager'
 import { ProductFilterFields } from './product-filter-fields'
+import { SkuManager } from './sku-manager'
 
 type SaleStatusFilter = 'all' | SaleStatus
 type AuditStatusFilter = 'all' | AuditStatus
@@ -36,6 +38,8 @@ export function ProductPageView() {
   const [formOpen, setFormOpen] = useState(false)
   const [editData, setEditData] = useState<ProductSpu | null>(null)
   const [deleteTarget, setDeleteTarget] = useState<ProductSpu | null>(null)
+  const [imageTarget, setImageTarget] = useState<ProductSpu | null>(null)
+  const [skuTarget, setSkuTarget] = useState<ProductSpu | null>(null)
 
   const supplierQuery = useSupplierOptions()
   const brandQuery = useBrandOptions()
@@ -96,6 +100,14 @@ export function ProductPageView() {
   const handleFormClose = () => {
     setFormOpen(false)
     setEditData(null)
+  }
+
+  const handleManageImages = (product: ProductSpu) => {
+    setImageTarget(product)
+  }
+
+  const handleManageSku = (product: ProductSpu) => {
+    setSkuTarget(product)
   }
 
   const handleDelete = (product: ProductSpu) => {
@@ -169,6 +181,8 @@ export function ProductPageView() {
         onRefresh={() => pageQuery.refetch()}
         onEdit={handleEdit}
         onDelete={handleDelete}
+        onManageImages={handleManageImages}
+        onManageSku={handleManageSku}
       />
 
       <ProductPagination
@@ -189,6 +203,20 @@ export function ProductPageView() {
         loading={deleteMutation.isPending}
         onClose={() => setDeleteTarget(null)}
         onConfirm={handleConfirmDelete}
+      />
+
+      <ProductImageManager
+        open={!!imageTarget}
+        onClose={() => setImageTarget(null)}
+        spuId={imageTarget?.id ?? 0}
+        productName={imageTarget?.name ?? ''}
+      />
+
+      <SkuManager
+        open={!!skuTarget}
+        onClose={() => setSkuTarget(null)}
+        spuId={skuTarget?.id ?? 0}
+        productName={skuTarget?.name ?? ''}
       />
     </div>
   )

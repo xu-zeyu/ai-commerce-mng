@@ -33,6 +33,8 @@ export interface ProductSpu {
   auditStatus: AuditStatus
   /** 排序值 */
   sort?: number | null
+  /** 主图 URL 列表 */
+  mainImage?: string[] | null
   createdTime?: string
   updatedTime?: string
 }
@@ -82,3 +84,123 @@ export interface ProductOption {
   id: number
   label: string
 }
+
+/** 商品图片类型，对齐后端 ImageTypeEnum */
+export const IMAGE_TYPE = {
+  MAIN: "MAIN",
+  CAROUSEL: "CAROUSEL",
+  DETAIL: "DETAIL",
+} as const
+
+export type ProductImageType = (typeof IMAGE_TYPE)[keyof typeof IMAGE_TYPE]
+
+/** 图片类型标签映射 */
+export const IMAGE_TYPE_LABELS: Record<ProductImageType, string> = {
+  [IMAGE_TYPE.MAIN]: '主图',
+  [IMAGE_TYPE.CAROUSEL]: '轮播图',
+  [IMAGE_TYPE.DETAIL]: '详情图',
+}
+
+/** 商品SPU图片记录 */
+export interface ProductSpuImage {
+  id: number
+  /** 所属SPU ID */
+  spuId: number
+  /** 图片类型：1-主图 2-轮播图 3-详情图 */
+  imageType: ProductImageType
+  /** 图片地址数组 */
+  imageUrls: string[]
+  createdTime?: string
+  updatedTime?: string
+}
+
+export interface ProductImagePageParams {
+  page: number
+  size: number
+  /** SPU ID筛选 */
+  spuId?: number
+  /** 图片类型筛选 */
+  imageType?: number
+}
+
+export interface ProductImagePageResult {
+  records: ProductSpuImage[]
+  total: number
+  size: number
+  current: number
+  pages?: number
+}
+
+export interface ProductImagePayload {
+  spuId: number
+  imageType: ProductImageType
+  imageUrls: string[]
+}
+
+// ─── SKU ────────────────────────────────────────────
+
+/** SKU 状态，对齐后端 SkuStatusEnum */
+export const SKU_STATUS = {
+  DISABLED: 'DISABLED',
+  ENABLED: 'ENABLED',
+} as const
+
+export type SkuStatus = (typeof SKU_STATUS)[keyof typeof SKU_STATUS]
+
+/** SKU 状态标签映射 */
+export const SKU_STATUS_LABELS: Record<SkuStatus, string> = {
+  [SKU_STATUS.DISABLED]: '禁用',
+  [SKU_STATUS.ENABLED]: '启用',
+}
+
+export interface ProductSku {
+  id: number
+  /** 所属 SPU ID */
+  spuId: number
+  /** SKU 编码 */
+  skuCode: string
+  /** 规格信息 JSON */
+  specInfo?: string | null
+  /** SKU 图片 URL */
+  image?: string | null
+  /** 售价 */
+  price: number
+  /** 原价 */
+  originalPrice?: number | null
+  /** 库存 */
+  stock: number
+  /** 销量 */
+  salesCount?: number
+  /** 状态：DISABLED-禁用 ENABLED-启用 */
+  status: SkuStatus
+  createdTime?: string
+  updatedTime?: string
+}
+
+export interface ProductSkuPageParams {
+  page: number
+  size: number
+  /** SPU ID 筛选 */
+  spuId?: number
+}
+
+export interface ProductSkuPageResult {
+  records: ProductSku[]
+  total: number
+  size: number
+  current: number
+  pages?: number
+}
+
+export interface CreateProductSkuPayload {
+  spuId: number
+  skuCode: string
+  specInfo?: string
+  image?: string
+  price: number
+  originalPrice?: number
+  stock: number
+  status: SkuStatus
+}
+
+export type UpdateProductSkuPayload = CreateProductSkuPayload

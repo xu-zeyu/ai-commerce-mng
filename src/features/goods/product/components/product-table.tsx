@@ -2,11 +2,11 @@
 
 import { useMemo } from 'react'
 import type { ColumnDef } from '@tanstack/react-table'
-import { Edit3, Trash2 } from 'lucide-react'
+import { Edit3, ImagePlus, Trash2, Package } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import { DataTable } from '@/components/common/data-table'
-import { PRODUCT_DELETE_CODES, PRODUCT_UPDATE_CODES } from '../lib/product-permissions'
+import { PRODUCT_DELETE_CODES, PRODUCT_IMAGE_VIEW_CODES, PRODUCT_UPDATE_CODES, SKU_VIEW_CODES } from '../lib/product-permissions'
 import {
   AUDIT_STATUS_LABEL,
   AUDIT_STATUS_VARIANT,
@@ -20,6 +20,8 @@ interface Props {
   refreshing?: boolean
   onEdit: (product: ProductSpu) => void
   onDelete: (product: ProductSpu) => void
+  onManageImages: (product: ProductSpu) => void
+  onManageSku: (product: ProductSpu) => void
   onRefresh?: () => void
 }
 
@@ -39,21 +41,37 @@ function formatDate(value?: string) {
   return value ? value.slice(0, 10) : '—'
 }
 
-export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRefresh }: Props) {
+export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onManageImages, onManageSku, onRefresh }: Props) {
   const columns = useMemo<ColumnDef<ProductSpu>[]>(
     () => [
       {
         accessorKey: 'name',
         header: '商品',
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <span className="font-medium text-foreground">{row.original.name}</span>
-            <span className="text-xs text-muted-foreground">{row.original.spuCode}</span>
-            {row.original.subTitle && (
-              <span className="text-xs text-muted-foreground line-clamp-1">{row.original.subTitle}</span>
-            )}
-          </div>
-        ),
+        cell: ({ row }) => {
+          const mainImageUrl = row.original.mainImage?.[0]
+          return (
+            <div className="flex items-center gap-3">
+              {mainImageUrl ? (
+                <img
+                  src={mainImageUrl}
+                  alt={row.original.name}
+                  className="size-11 shrink-0 rounded-xl object-cover shadow-sm"
+                />
+              ) : (
+                <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                  <ImagePlus className="size-4 opacity-40" />
+                </div>
+              )}
+              <div className="flex flex-col min-w-0">
+                <span className="font-medium text-foreground truncate">{row.original.name}</span>
+                <span className="text-xs text-muted-foreground">{row.original.spuCode}</span>
+                {row.original.subTitle && (
+                  <span className="text-xs text-muted-foreground line-clamp-1">{row.original.subTitle}</span>
+                )}
+              </div>
+            </div>
+          )
+        },
       },
       {
         accessorKey: 'categoryName',
@@ -97,6 +115,28 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
               variant="ghost"
               size="sm"
               className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              permission={PRODUCT_IMAGE_VIEW_CODES}
+              onClick={() => onManageImages(row.original)}
+            >
+              <ImagePlus className="size-3.5" />
+              图片
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
+              permission={SKU_VIEW_CODES}
+              onClick={() => onManageSku(row.original)}
+            >
+              <Package className="size-3.5" />
+              SKU
+            </Button>
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="h-8 px-2 text-muted-foreground hover:text-foreground"
               permission={PRODUCT_UPDATE_CODES}
               onClick={() => onEdit(row.original)}
             >
@@ -118,7 +158,7 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
         ),
       },
     ],
-    [onEdit, onDelete],
+    [onEdit, onDelete, onManageImages, onManageSku],
   )
 
   return (
@@ -132,12 +172,27 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
         tools
         emptyText="暂无商品"
         getRowId={(row) => String(row.id)}
-        renderMobileCard={(row) => (
+        renderMobileCard={(row) => {
+          const mainImageUrl = row.mainImage?.[0]
+          return (
           <div className="space-y-2 rounded-2xl border border-border/60 bg-card/80 p-4 shadow-sm">
             <div className="flex items-start justify-between gap-2">
-              <div className="flex flex-col">
-                <span className="font-medium">{row.name}</span>
-                <span className="text-xs text-muted-foreground">{row.spuCode}</span>
+              <div className="flex items-center gap-3 min-w-0">
+                {mainImageUrl ? (
+                  <img
+                    src={mainImageUrl}
+                    alt={row.name}
+                    className="size-14 shrink-0 rounded-xl object-cover shadow-sm"
+                  />
+                ) : (
+                  <div className="flex size-14 shrink-0 items-center justify-center rounded-xl bg-muted text-muted-foreground">
+                    <ImagePlus className="size-5 opacity-40" />
+                  </div>
+                )}
+                <div className="flex flex-col min-w-0">
+                  <span className="font-medium truncate">{row.name}</span>
+                  <span className="text-xs text-muted-foreground">{row.spuCode}</span>
+                </div>
               </div>
               <div className="flex shrink-0 flex-col items-end gap-1">
                 <SaleBadge status={row.saleStatus} />
@@ -168,6 +223,28 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
                 variant="ghost"
                 size="sm"
                 className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                permission={PRODUCT_IMAGE_VIEW_CODES}
+                onClick={() => onManageImages(row)}
+              >
+                <ImagePlus className="size-3.5" />
+                图片
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
+                permission={SKU_VIEW_CODES}
+                onClick={() => onManageSku(row)}
+              >
+                <Package className="size-3.5" />
+                SKU
+              </Button>
+              <Button
+                type="button"
+                variant="ghost"
+                size="sm"
+                className="h-8 px-2 text-muted-foreground hover:text-foreground"
                 permission={PRODUCT_UPDATE_CODES}
                 onClick={() => onEdit(row)}
               >
@@ -187,7 +264,8 @@ export function ProductTable({ data, loading, refreshing, onEdit, onDelete, onRe
               </Button>
             </div>
           </div>
-        )}
+          )
+        }}
       />
     </div>
   )
