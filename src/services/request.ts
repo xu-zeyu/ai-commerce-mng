@@ -40,6 +40,10 @@ request.interceptors.response.use(
     return data
   },
   async (error: AxiosError<{ msg?: string }>) => {
+    if (error.code === 'ERR_CANCELED') {
+      return Promise.reject(error)
+    }
+
     let message = '网络错误，请稍后重试'
     if (error.response) {
       const status = error.response.status

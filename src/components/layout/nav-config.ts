@@ -1,4 +1,5 @@
 import {
+  Bot,
   FolderTree,
   LayoutDashboard,
   Settings,
@@ -32,6 +33,7 @@ export const NAV_SECTIONS: NavSection[] = [
     label: '运营',
     items: [
       { label: '概览', href: '/', icon: LayoutDashboard },
+      { label: 'AI 运营助手', href: '/ai/chat', icon: Bot },
       {
         label: '商品管理',
         href: '/goods',
