@@ -6,25 +6,32 @@ import {
   useLocalRuntime,
   type ChatModelAdapter,
 } from '@assistant-ui/react'
-import { sendChatMessage } from '../api/send-chat-message'
+import { useAuthStore } from '@/stores/use-auth-store'
+import { streamChatMessage } from '../api/stream-chat-message'
 import { getLatestUserMessage } from '../lib/get-latest-user-message'
+import { smoothChatContent } from '../lib/smooth-chat-content'
 
 interface AiChatRuntimeProviderProps {
   children: ReactNode
   modelId: number
 }
 
-function createChatModelAdapter(modelId: number): ChatModelAdapter {
+function createChatModelAdapter(
+  modelId: number,
+  token: string | null,
+): ChatModelAdapter {
   return {
-    async run({ messages, abortSignal }) {
+    async *run({ messages, abortSignal }) {
       const message = getLatestUserMessage(messages)
-      const response = await sendChatMessage(
+      const stream = streamChatMessage(
         { modelId, message },
-        abortSignal,
+        { signal: abortSignal, token },
       )
 
-      return {
-        content: [{ type: 'text', text: response.content }],
+      for await (const content of smoothChatContent(stream, abortSignal)) {
+        yield {
+          content: [{ type: 'text', text: content }],
+        }
       }
     },
   }
@@ -34,7 +41,11 @@ export function AiChatRuntimeProvider({
   children,
   modelId,
 }: AiChatRuntimeProviderProps) {
-  const adapter = useMemo(() => createChatModelAdapter(modelId), [modelId])
+  const token = useAuthStore((state) => state.token)
+  const adapter = useMemo(
+    () => createChatModelAdapter(modelId, token),
+    [modelId, token],
+  )
   const runtime = useLocalRuntime(adapter)
 
   return (

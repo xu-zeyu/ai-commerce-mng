@@ -1,6 +1,6 @@
 import 'server-only'
 
-const FALLBACK_MODEL_ID = 1
+const FALLBACK_MODEL_ID = 2
 
 export function getAiChatModelId(): number {
   const modelId = Number(process.env.AI_CHAT_MODEL_ID ?? FALLBACK_MODEL_ID)

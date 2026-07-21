@@ -1,6 +1,6 @@
 'use client'
 
-import { Bot, Circle } from 'lucide-react'
+import { Circle, Sparkles } from 'lucide-react'
 import { AiChatRuntimeProvider } from './ai-chat-runtime-provider'
 import { ChatThread } from './chat-thread'
 
@@ -14,7 +14,7 @@ export function AiChatPageView({ modelId }: AiChatPageViewProps) {
       <header className="flex items-center justify-between gap-4 border-b bg-card/70 px-4 py-3.5 sm:px-6">
         <div className="flex min-w-0 items-center gap-3">
           <div className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-primary/12 text-primary ring-1 ring-primary/15">
-            <Bot className="size-5" />
+            <Sparkles className="size-5" />
           </div>
           <div className="min-w-0">
             <h1 className="truncate text-sm font-semibold sm:text-base">AI 运营助手</h1>
@@ -24,10 +24,9 @@ export function AiChatPageView({ modelId }: AiChatPageViewProps) {
           </div>
         </div>
 
-        <div className="flex shrink-0 items-center gap-2 rounded-xl bg-accent/70 px-3 py-2 text-xs text-accent-foreground">
+        <div className="flex shrink-0 items-center gap-2 rounded-full bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-700 dark:text-emerald-400">
           <Circle className="size-2 fill-current text-emerald-500" />
-          <span className="hidden sm:inline">模型</span>
-          <span>#{modelId}</span>
+          <span>在线</span>
         </div>
       </header>
 

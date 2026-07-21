@@ -1,7 +1,7 @@
 'use client'
 
 import { ThreadPrimitive } from '@assistant-ui/react'
-import { Bot, PackageSearch, Sparkles, WandSparkles } from 'lucide-react'
+import { PackageSearch, Sparkles, WandSparkles } from 'lucide-react'
 
 const SUGGESTIONS = [
   {
@@ -25,7 +25,7 @@ export function ChatEmptyState() {
   return (
     <div className="mx-auto flex min-h-[430px] w-full max-w-3xl flex-col items-center justify-center px-4 py-12 text-center sm:px-6">
       <div className="flex size-14 items-center justify-center rounded-2xl bg-primary/12 text-primary shadow-sm ring-1 ring-primary/15">
-        <Bot className="size-7" />
+        <Sparkles className="size-7" />
       </div>
       <h2 className="mt-5 text-xl font-semibold tracking-tight sm:text-2xl">
         今天想优化什么？

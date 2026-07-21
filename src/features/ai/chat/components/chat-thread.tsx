@@ -14,7 +14,7 @@ export function ChatThread() {
           <ChatEmptyState />
         </AuiIf>
 
-        <div className="w-full py-3">
+        <div className="w-full pb-6 pt-3">
           <ThreadPrimitive.Messages>
             {({ message }) =>
               message.role === 'user' ? <UserMessage /> : <AssistantMessage />
@@ -24,13 +24,13 @@ export function ChatThread() {
 
         <ThreadPrimitive.ScrollToBottom
           title="滚动到底部"
-          className="sticky bottom-28 z-10 mx-auto flex size-9 items-center justify-center rounded-full border bg-card/90 text-muted-foreground shadow-md backdrop-blur transition hover:text-foreground disabled:invisible"
+          className="sticky bottom-28 z-10 mx-auto flex size-9 items-center justify-center rounded-full border bg-background/90 text-muted-foreground shadow-md backdrop-blur transition hover:bg-muted hover:text-foreground disabled:invisible"
         >
           <ArrowDown className="size-4" />
           <span className="sr-only">滚动到底部</span>
         </ThreadPrimitive.ScrollToBottom>
 
-        <ThreadPrimitive.ViewportFooter className="sticky bottom-0 z-20 mt-auto bg-gradient-to-t from-card via-card/95 to-transparent px-3 pb-3 pt-8 sm:px-6 sm:pb-5">
+        <ThreadPrimitive.ViewportFooter className="sticky bottom-0 z-20 mt-auto bg-gradient-to-t from-card via-card/95 to-transparent px-3 pb-3 pt-10 sm:px-6 sm:pb-5">
           <div className="mx-auto w-full max-w-3xl">
             <ChatComposer />
             <p className="mt-2 text-center text-[11px] text-muted-foreground">
