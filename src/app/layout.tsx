@@ -4,8 +4,11 @@ import { AppProviders } from "@/providers/app-providers";
 import "@/styles/globals.css";
 
 export const metadata: Metadata = {
-  title: "金晗跨境电商管理后台",
-  description: "现代化跨境电商管理后台",
+  title: {
+    default: "微信公众号自动化平台",
+    template: "%s | 微信公众号自动化平台",
+  },
+  description: "由 AI Agent 驱动的微信公众号自动化运营工作台",
 };
 
 const themeColorScript = `

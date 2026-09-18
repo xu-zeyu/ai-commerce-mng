@@ -1,12 +1,11 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ArrowRight, Lock, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Loader2, ArrowRight, Lock, MessageCircleMore, ShieldCheck, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,7 +15,6 @@ import { loginSchema, type LoginFormValues } from "@/features/auth/schemas/login
 import { getCaptcha } from "@/features/auth/api/get-captcha";
 import { login } from "@/features/auth/api/login";
 import { getAdminSelf } from "@/features/auth/api/get-admin-self";
-import logo from "@/assets/logo.png";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -105,18 +103,13 @@ export default function LoginPage() {
       transition={{ duration: 0.4, ease: "easeOut" }}
     >
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 shadow-lg backdrop-blur-xl supports-[backdrop-filter]:bg-card/50">
-        {/* 顶部 Logo 区 */}
         <div className="flex flex-col items-center px-8 pt-10 pb-6">
-          <Image
-            src={logo}
-            alt="金晗跨境"
-            width={48}
-            height={48}
-            className="rounded-xl shadow-sm"
-          />
-          <h1 className="mt-4 text-xl font-semibold">金晗跨境管理后台</h1>
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
+            <MessageCircleMore className="size-6" />
+          </div>
+          <h1 className="mt-4 text-xl font-semibold">微信公众号自动化平台</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            请输入账号密码登录
+            登录后查看 Agent 任务和实时输出
           </p>
         </div>
 
@@ -143,7 +136,7 @@ export default function LoginPage() {
               <UserIcon className="absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground/50" />
               <Input
                 id="username"
-                placeholder="请输入管理员用户名"
+                placeholder="请输入用户名"
                 className="pl-10"
                 disabled={isSubmitting}
                 {...register("username")}
@@ -226,9 +219,8 @@ export default function LoginPage() {
         </form>
       </div>
 
-      {/* 底部版权 */}
       <p className="mt-6 text-center text-xs text-muted-foreground">
-        © {new Date().getFullYear()} 金晗跨境电商 — 管理后台
+        © {new Date().getFullYear()} WeChat AI Automation
       </p>
     </motion.div>
   );

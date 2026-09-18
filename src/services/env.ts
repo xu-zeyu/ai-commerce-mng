@@ -1,35 +1,19 @@
-/**
- * 运行环境配置。
- *
- * 业务环境 (APP_ENV) 与 base_url 的映射规则：
- *   - dev  -> http://8.163.103.108/
- *   - test -> http://8.163.103.108/
- *   - prod -> 线上正式地址
- *
- * 优先级：显式的 NEXT_PUBLIC_API_BASE_URL > 按 APP_ENV 推断的默认值。
- */
+const trimTrailingSlash = (value: string) => value.replace(/\/+$/, '')
 
-export type AppEnv = "dev" | "test" | "prod";
+/** Java 服务仅用于登录、验证码和当前用户校验。 */
+export const JAVA_API_BASE_URL = trimTrailingSlash(
+  process.env.NEXT_PUBLIC_JAVA_API_BASE_URL ?? '/api',
+)
 
-const BASE_URL_BY_ENV: Record<AppEnv, string> = {
-  dev: "http://8.163.103.108/",
-  test: "http://8.163.103.108/",
-  prod: "https://api.jinhan-commerce.com/",
-};
+/** Python Agent 通过 Next.js 同源代理访问，避免浏览器 CORS 与混合内容问题。 */
+export const AGENT_API_BASE_URL = trimTrailingSlash(
+  process.env.NEXT_PUBLIC_AGENT_API_BASE_URL ?? '/agent-api',
+)
 
-function resolveAppEnv(): AppEnv {
-  const raw = process.env.NEXT_PUBLIC_APP_ENV?.toLowerCase();
-  if (raw === "test") return "test";
-  if (raw === "prod" || raw === "production") return "prod";
-  return "dev";
-}
+export const AGENT_SEE_URL = `${AGENT_API_BASE_URL}/api/see`
+export const AGENT_V1_BASE_URL = `${AGENT_API_BASE_URL}/api/v1`
+export const AGENT_DOCUMENT_UPLOAD_PATH =
+  process.env.NEXT_PUBLIC_AGENT_DOCUMENT_UPLOAD_PATH ?? '/documents'
 
-export const APP_ENV: AppEnv = resolveAppEnv();
-
-export const API_BASE_URL: string = (
-  process.env.NEXT_PUBLIC_API_BASE_URL ?? BASE_URL_BY_ENV[APP_ENV]
-).replace(/\/+$/, "");
-
-export const IS_DEV = APP_ENV === "dev";
-export const IS_TEST = APP_ENV === "test";
-export const IS_PROD = APP_ENV === "prod";
+// 保留别名，供登录请求层使用。
+export const API_BASE_URL = JAVA_API_BASE_URL

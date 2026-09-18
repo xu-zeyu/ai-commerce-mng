@@ -2,11 +2,14 @@ import type { NextConfig } from 'next'
 
 const trimTrailingSlash = (value: string) => value.replace(/\/$/, '')
 
-const baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || '/api'
-const apiProxyTarget = trimTrailingSlash(
-    process.env.API_PROXY_TARGET || 'http://8.163.103.108',
+const javaBaseUrl = process.env.NEXT_PUBLIC_JAVA_API_BASE_URL || '/api'
+const agentBaseUrl = process.env.NEXT_PUBLIC_AGENT_API_BASE_URL || '/agent-api'
+const javaProxyTarget = trimTrailingSlash(
+  process.env.JAVA_API_PROXY_TARGET || 'http://8.163.103.108',
 )
-const useProxy = baseUrl.startsWith('/')
+const agentProxyTarget = trimTrailingSlash(
+  process.env.AGENT_API_PROXY_TARGET || 'http://192.168.7.34:8080',
+)
 
 const config: NextConfig = {
   output: 'standalone',
@@ -20,13 +23,23 @@ const config: NextConfig = {
     ],
   },
   async rewrites() {
-    if (!useProxy) return []
-    return [
-      {
+    const rewrites = []
+
+    if (javaBaseUrl.startsWith('/')) {
+      rewrites.push({
         source: '/api/:path*',
-        destination: `${apiProxyTarget}/:path*`,
-      },
-    ]
+        destination: `${javaProxyTarget}/:path*`,
+      })
+    }
+
+    if (agentBaseUrl.startsWith('/')) {
+      rewrites.push({
+        source: '/agent-api/:path*',
+        destination: `${agentProxyTarget}/:path*`,
+      })
+    }
+
+    return rewrites
   },
 }
 

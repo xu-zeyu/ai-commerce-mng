@@ -1,7 +1,7 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-import { Moon, Sun, LogOut, User } from 'lucide-react'
+import { Moon, Sun, LogOut } from 'lucide-react'
 import { useTheme } from 'next-themes'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -9,7 +9,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { Breadcrumb } from './breadcrumb'
@@ -55,16 +54,11 @@ export function Topbar() {
                 {user?.userName ?? '管理员'}
               </div>
               <div className="mt-0.5 text-[11px] text-muted-foreground">
-                {user?.authorities?.length ? `${user.authorities.length} 个权限` : 'admin'}
+                平台管理员
               </div>
             </div>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-44">
-            <DropdownMenuItem>
-              <User className="mr-2 size-4" />
-              个人信息
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"
               onClick={handleLogout}

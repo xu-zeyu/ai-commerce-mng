@@ -1,26 +1,15 @@
 import {
-  Bot,
-  FolderTree,
+  Activity,
+  FileText,
   LayoutDashboard,
-  Settings,
   type LucideIcon,
 } from 'lucide-react'
-import { Permissions, type PermissionCode } from '@/permissions/rbac'
-
-export interface NavChildItem {
-  label: string
-  href: string
-  icon?: LucideIcon
-  permission?: PermissionCode
-  children?: NavChildItem[]
-}
 
 export interface NavItem {
   label: string
+  description: string
   href: string
   icon: LucideIcon
-  permission?: PermissionCode
-  children?: NavChildItem[]
 }
 
 export interface NavSection {
@@ -30,58 +19,25 @@ export interface NavSection {
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    label: '运营',
+    label: '工作台',
     items: [
-      { label: '概览', href: '/', icon: LayoutDashboard },
-      { label: 'AI 运营助手', href: '/ai/chat', icon: Bot },
       {
-        label: '商品管理',
-        href: '/goods',
-        icon: FolderTree,
-        children: [
-          {
-            label: '商品分类',
-            href: '/goods/category',
-            permission: [
-              Permissions.CATEGORY_VIEW,
-              Permissions.CATEGORY_MANAGE,
-              Permissions.GOODS_CATEGORY_PAGE,
-              Permissions.GOODS_CATEGORY_TREE,
-            ],
-          },
-          {
-            label: '供应商',
-            href: '/goods/supplier',
-            permission: Permissions.SUPPLIER_PAGE,
-          },
-          {
-            label: '品牌管理',
-            href: '/goods/brand',
-            permission: Permissions.GOODS_BRAND_PAGE,
-          },
-          {
-            label: '商品列表',
-            href: '/goods/product',
-            permission: Permissions.PRODUCT_SPU_PAGE,
-          },
-        ],
+        label: '运行概览',
+        description: '查看 Agent 接入和工作状态',
+        href: '/',
+        icon: LayoutDashboard,
       },
-    ],
-  },
-  {
-    label: '系统',
-    items: [
       {
-        label: '设置',
-        href: '/settings',
-        icon: Settings,
-        children: [
-          {
-            label: '角色管理',
-            href: '/settings/roles',
-            permission: [Permissions.ROLE_MANAGE, Permissions.ROLE_MANAGE_LEGACY],
-          },
-        ],
+        label: '实时输出',
+        description: '查看 AI Agent 流式返回',
+        href: '/stream',
+        icon: Activity,
+      },
+      {
+        label: '知识文档',
+        description: '上传公众号运营所需的 Markdown',
+        href: '/knowledge',
+        icon: FileText,
       },
     ],
   },

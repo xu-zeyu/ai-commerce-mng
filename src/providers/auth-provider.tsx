@@ -2,11 +2,10 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { LoaderCircle, MessageCircleMore } from "lucide-react";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { getAdminSelf } from "@/features/auth/api/get-admin-self";
 import { isAxiosError } from "axios";
-import pageLoading from "@/assets/pageLoading.png";
-import Image from "next/image";
 
 const PUBLIC_PATHS = ["/login"];
 
@@ -95,15 +94,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Image
-            src={pageLoading}
-            alt="加载中"
-            width={80}
-            height={80}
-            className="animate-pulse"
-            priority
-          />
-          <p className="text-sm text-muted-foreground">加载中...</p>
+          <div className="relative flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
+            <MessageCircleMore className="size-7" />
+            <LoaderCircle className="absolute -inset-1 size-16 animate-spin text-primary/25" />
+          </div>
+          <p className="text-sm text-muted-foreground">正在加载平台…</p>
         </div>
       </div>
     );
@@ -113,15 +108,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
-          <Image
-            src={pageLoading}
-            alt="跳转中"
-            width={80}
-            height={80}
-            className="animate-pulse"
-            priority
-          />
-          <p className="text-sm text-muted-foreground">正在跳转...</p>
+          <LoaderCircle className="size-8 animate-spin text-primary" />
+          <p className="text-sm text-muted-foreground">正在进入登录页…</p>
         </div>
       </div>
     );

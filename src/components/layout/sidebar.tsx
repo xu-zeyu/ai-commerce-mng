@@ -1,99 +1,81 @@
 'use client'
 
 import { useCallback } from 'react'
-import Image from 'next/image'
 import { usePathname } from 'next/navigation'
-import { PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { MessageCircleMore, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useFilteredNav } from '@/hooks/use-filtered-nav'
 import { useSidebarStore } from '@/stores/use-sidebar-store'
+import { NAV_SECTIONS } from './nav-config'
 import { NavItem } from './nav-item'
 import { ThemeColorSwitcher } from './theme-color-switcher'
-import logo from '@/assets/logo.png'
 
-interface Props {
+interface SidebarProps {
   onNavigate?: () => void
   forceExpanded?: boolean
 }
 
-export function Sidebar({ onNavigate, forceExpanded }: Props) {
+export function Sidebar({ onNavigate, forceExpanded }: SidebarProps) {
   const pathname = usePathname()
-  const sections = useFilteredNav()
-  const collapsed = useSidebarStore((s) => s.collapsed)
-  const toggle = useSidebarStore((s) => s.toggle)
-
+  const collapsed = useSidebarStore((state) => state.collapsed)
+  const toggle = useSidebarStore((state) => state.toggle)
   const isCollapsed = forceExpanded ? false : collapsed
-
   const isActive = useCallback(
-    (href: string) =>
-      pathname === href || (href !== '/' && pathname.startsWith(`${href}/`)),
+    (href: string) => pathname === href || (href !== '/' && pathname.startsWith(`${href}/`)),
     [pathname],
   )
 
   return (
     <TooltipProvider>
       <div className="flex h-full flex-col" onClick={onNavigate}>
-        {/* Logo */}
         <div className={`px-4 py-5 ${isCollapsed ? 'flex justify-center' : ''}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
-            <Image src={logo} alt="金晗跨境" width={36} height={36} className="rounded-xl shadow-sm shrink-0" />
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+              <MessageCircleMore className="size-5" />
+            </div>
             {!isCollapsed && (
               <div className="min-w-0 leading-tight">
-                <div className="truncate whitespace-nowrap text-sm font-semibold">金晗跨境</div>
-                <div className="truncate whitespace-nowrap text-[11px] text-muted-foreground">电商管理后台</div>
+                <div className="truncate text-sm font-semibold">微信公众号</div>
+                <div className="truncate text-[11px] text-muted-foreground">AI 自动化平台</div>
               </div>
             )}
           </div>
         </div>
 
         <Separator />
-
-        {/* Navigation */}
         <ScrollArea className="flex-1 px-2 py-4">
           <nav className="space-y-6">
-            {sections.map((section) => (
+            {NAV_SECTIONS.map((section) => (
               <div key={section.label} className="space-y-1.5">
                 {!isCollapsed && (
-                  <div className="truncate whitespace-nowrap px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
+                  <p className="px-3 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground/80">
                     {section.label}
-                  </div>
+                  </p>
                 )}
-                <div className="space-y-0.5">
-                  {section.items.map((item) => (
-                    <NavItem
-                      key={item.href}
-                      item={item}
-                      collapsed={isCollapsed}
-                      isActive={isActive}
-                    />
-                  ))}
-                </div>
+                {section.items.map((item) => (
+                  <NavItem key={item.href} item={item} collapsed={isCollapsed} isActive={isActive} />
+                ))}
               </div>
             ))}
           </nav>
         </ScrollArea>
 
-        {/* Bottom */}
         {!isCollapsed && (
           <>
             <Separator />
-            <div className="space-y-3 px-4 py-3">
-              <ThemeColorSwitcher />
-            </div>
+            <div className="px-4 py-3"><ThemeColorSwitcher /></div>
           </>
         )}
-
         <Separator />
         <div className={`flex items-center px-3 py-3 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-          {!isCollapsed && (
-            <span className="text-xs text-muted-foreground">© {new Date().getFullYear()} 金晗跨境</span>
-          )}
+          {!isCollapsed && <span className="text-xs text-muted-foreground">Agent Console</span>}
           {!forceExpanded && (
             <button
-              onClick={(e) => { e.stopPropagation(); toggle() }}
-              className="rounded-lg p-1.5 text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+              type="button"
+              aria-label={isCollapsed ? '展开导航' : '收起导航'}
+              onClick={(event) => { event.stopPropagation(); toggle() }}
+              className="rounded-lg p-1.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
             >
               {isCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
             </button>
