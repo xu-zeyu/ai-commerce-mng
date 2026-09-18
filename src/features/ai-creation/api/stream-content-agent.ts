@@ -1,7 +1,7 @@
 import type { ContentAgentRequest } from '../types'
 import { useAuthStore } from '@/stores/use-auth-store'
 
-const CONTENT_AGENT_URL = '/api/sse/baseWeChat/content/agent'
+const CONTENT_AGENT_URL = '/api/sse/content-agent'
 
 function extractText(value: unknown): string {
   if (typeof value === 'string') return value
