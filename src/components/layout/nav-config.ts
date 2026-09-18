@@ -1,7 +1,7 @@
 import {
-  Activity,
-  FileText,
-  LayoutDashboard,
+  BookOpenText,
+  Bot,
+  Headphones,
   type LucideIcon,
 } from 'lucide-react'
 
@@ -19,25 +19,25 @@ export interface NavSection {
 
 export const NAV_SECTIONS: NavSection[] = [
   {
-    label: '工作台',
+    label: '智能工作台',
     items: [
       {
-        label: '运行概览',
-        description: '查看 Agent 接入和工作状态',
-        href: '/',
-        icon: LayoutDashboard,
+        label: '知识库',
+        description: '沉淀企业资料与内容规范',
+        href: '/knowledge-base',
+        icon: BookOpenText,
       },
       {
-        label: '实时输出',
-        description: '查看 AI Agent 流式返回',
-        href: '/stream',
-        icon: Activity,
+        label: 'AI 创作',
+        description: '按主题生成公众号内容',
+        href: '/ai-creation',
+        icon: Bot,
       },
       {
-        label: '知识文档',
-        description: '上传公众号运营所需的 Markdown',
-        href: '/knowledge',
-        icon: FileText,
+        label: '企业客服',
+        description: '统一管理客户咨询与服务',
+        href: '/customer-service',
+        icon: Headphones,
       },
     ],
   },

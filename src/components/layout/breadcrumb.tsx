@@ -12,9 +12,9 @@ export function Breadcrumb() {
 
   return (
     <nav className="flex items-center gap-1 text-sm text-muted-foreground" aria-label="面包屑">
-      <span>自动化平台</span>
+      <span>智能工作台</span>
       <ChevronRight className="size-3.5 opacity-60" />
-      <span className="font-medium text-foreground">{current?.label ?? '工作台'}</span>
+      <span className="font-medium text-foreground">{current?.label ?? 'AI 创作'}</span>
     </nav>
   )
 }

@@ -10,7 +10,6 @@ export const AGENT_API_BASE_URL = trimTrailingSlash(
   process.env.NEXT_PUBLIC_AGENT_API_BASE_URL ?? '/agent-api',
 )
 
-export const AGENT_SEE_URL = `${AGENT_API_BASE_URL}/api/see`
 export const AGENT_V1_BASE_URL = `${AGENT_API_BASE_URL}/api/v1`
 export const AGENT_DOCUMENT_UPLOAD_PATH =
   process.env.NEXT_PUBLIC_AGENT_DOCUMENT_UPLOAD_PATH ?? '/documents'

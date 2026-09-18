@@ -25,6 +25,15 @@ const config: NextConfig = {
   async rewrites() {
     const rewrites = []
 
+    // 内容创作 SSE 属于 Python Agent。必须放在通用 Java /api 代理之前，
+    // 并保留后端路由需要的 /api/sse 前缀。
+    if (agentBaseUrl.startsWith('/')) {
+      rewrites.push({
+        source: '/api/sse/:path*',
+        destination: `${agentProxyTarget}/api/sse/:path*`,
+      })
+    }
+
     if (javaBaseUrl.startsWith('/')) {
       rewrites.push({
         source: '/api/:path*',

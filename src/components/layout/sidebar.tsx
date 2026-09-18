@@ -2,7 +2,7 @@
 
 import { useCallback } from 'react'
 import { usePathname } from 'next/navigation'
-import { MessageCircleMore, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
+import { Bot, PanelLeftClose, PanelLeftOpen } from 'lucide-react'
 import { ScrollArea } from '@/components/ui/scroll-area'
 import { Separator } from '@/components/ui/separator'
 import { TooltipProvider } from '@/components/ui/tooltip'
@@ -32,12 +32,12 @@ export function Sidebar({ onNavigate, forceExpanded }: SidebarProps) {
         <div className={`px-4 py-5 ${isCollapsed ? 'flex justify-center' : ''}`}>
           <div className={`flex items-center ${isCollapsed ? 'justify-center' : 'gap-3'}`}>
             <div className="flex size-9 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
-              <MessageCircleMore className="size-5" />
+              <Bot className="size-5" />
             </div>
             {!isCollapsed && (
               <div className="min-w-0 leading-tight">
-                <div className="truncate text-sm font-semibold">微信公众号</div>
-                <div className="truncate text-[11px] text-muted-foreground">AI 自动化平台</div>
+                <div className="truncate text-sm font-semibold">金晗智能助手</div>
+                <div className="truncate text-[11px] text-muted-foreground">企业 AI 工作台</div>
               </div>
             )}
           </div>
@@ -69,7 +69,7 @@ export function Sidebar({ onNavigate, forceExpanded }: SidebarProps) {
         )}
         <Separator />
         <div className={`flex items-center px-3 py-3 ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-          {!isCollapsed && <span className="text-xs text-muted-foreground">Agent Console</span>}
+          {!isCollapsed && <span className="text-xs text-muted-foreground">AI Workspace</span>}
           {!forceExpanded && (
             <button
               type="button"

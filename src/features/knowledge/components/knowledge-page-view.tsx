@@ -6,8 +6,8 @@ export function KnowledgePageView() {
   return (
     <div className="space-y-6">
       <header>
-        <p className="text-sm font-medium text-primary">AGENT KNOWLEDGE</p>
-        <h1 className="mt-1 text-2xl font-semibold tracking-tight">知识文档</h1>
+        <p className="text-sm font-medium text-primary">KNOWLEDGE BASE</p>
+        <h1 className="mt-1 text-2xl font-semibold tracking-tight">知识库</h1>
         <p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
           将品牌规范、内容语调、选题准则等 Markdown 文档提交给 AI Agent，业务请求统一通过 /api/v1 处理。
         </p>

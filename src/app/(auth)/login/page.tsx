@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion, AnimatePresence } from "framer-motion";
-import { Loader2, ArrowRight, Lock, MessageCircleMore, ShieldCheck, User as UserIcon } from "lucide-react";
+import { Loader2, ArrowRight, Bot, Lock, ShieldCheck, User as UserIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -105,11 +105,11 @@ export default function LoginPage() {
       <div className="overflow-hidden rounded-3xl border border-border/60 bg-card/80 shadow-lg backdrop-blur-xl supports-[backdrop-filter]:bg-card/50">
         <div className="flex flex-col items-center px-8 pt-10 pb-6">
           <div className="flex size-12 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-sm">
-            <MessageCircleMore className="size-6" />
+            <Bot className="size-6" />
           </div>
-          <h1 className="mt-4 text-xl font-semibold">微信公众号自动化平台</h1>
+          <h1 className="mt-4 text-xl font-semibold">金晗智能助手</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            登录后查看 Agent 任务和实时输出
+            登录后使用知识库、AI 创作与企业客服
           </p>
         </div>
 

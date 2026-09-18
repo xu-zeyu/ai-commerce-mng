@@ -5,10 +5,10 @@ import "@/styles/globals.css";
 
 export const metadata: Metadata = {
   title: {
-    default: "微信公众号自动化平台",
-    template: "%s | 微信公众号自动化平台",
+    default: "金晗智能助手",
+    template: "%s | 金晗智能助手",
   },
-  description: "由 AI Agent 驱动的微信公众号自动化运营工作台",
+  description: "知识管理、AI 内容创作与企业客户服务工作台",
 };
 
 const themeColorScript = `

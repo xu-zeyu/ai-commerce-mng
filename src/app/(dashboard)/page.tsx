@@ -1,5 +1,5 @@
-import { DashboardView } from "@/features/dashboard/components/dashboard-view";
+import { redirect } from 'next/navigation'
 
 export default function DashboardPage() {
-  return <DashboardView />;
+  redirect('/ai-creation')
 }

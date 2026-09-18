@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState, type ReactNode } from "react";
 import { usePathname, useRouter } from "next/navigation";
-import { LoaderCircle, MessageCircleMore } from "lucide-react";
+import { Bot, LoaderCircle } from "lucide-react";
 import { useAuthStore } from "@/stores/use-auth-store";
 import { getAdminSelf } from "@/features/auth/api/get-admin-self";
 import { isAxiosError } from "axios";
@@ -95,7 +95,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="flex flex-col items-center gap-4">
           <div className="relative flex size-14 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-            <MessageCircleMore className="size-7" />
+            <Bot className="size-7" />
             <LoaderCircle className="absolute -inset-1 size-16 animate-spin text-primary/25" />
           </div>
           <p className="text-sm text-muted-foreground">正在加载平台…</p>
