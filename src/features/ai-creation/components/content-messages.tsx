@@ -8,7 +8,7 @@ import {
   useSmooth,
   type TextMessagePartProps,
 } from '@assistant-ui/react'
-import { AlertCircle, Copy, RefreshCw, Sparkles } from 'lucide-react'
+import { AlertCircle, Bot, Copy, RefreshCw, Sparkles } from 'lucide-react'
 import { ContentMarkdown } from './content-markdown'
 import { parseContentRequestMessage } from '../lib/content-request-message'
 
@@ -54,8 +54,8 @@ function RequestText({ text }: TextMessagePartProps) {
 
 export function ContentRequestMessage() {
   return (
-    <MessagePrimitive.Root className="mx-auto w-full max-w-4xl px-5 pt-6 sm:px-8">
-      <div className="rounded-2xl border bg-muted/45 px-4 py-3">
+    <MessagePrimitive.Root className="mx-auto flex w-full max-w-3xl justify-end px-4 py-3 sm:px-6">
+      <div className="max-w-[88%] rounded-3xl rounded-br-lg bg-muted px-4 py-3 text-foreground sm:max-w-[78%]">
         <MessagePrimitive.Parts components={{ Text: RequestText }} />
       </div>
     </MessagePrimitive.Root>
@@ -64,24 +64,27 @@ export function ContentRequestMessage() {
 
 export function ContentAssistantMessage() {
   return (
-    <MessagePrimitive.Root className="group mx-auto w-full max-w-4xl px-5 py-6 sm:px-8 sm:py-8">
-      <div className="min-w-0">
+    <MessagePrimitive.Root className="group mx-auto flex w-full max-w-3xl gap-3 px-4 py-4 sm:gap-4 sm:px-6">
+      <div className="mt-0.5 flex size-8 shrink-0 items-center justify-center rounded-xl bg-primary text-primary-foreground shadow-sm">
+        <Bot className="size-4" />
+      </div>
+      <div className="min-w-0 flex-1">
         <MessagePrimitive.Parts components={{ Text: AssistantText }} />
         <MessagePrimitive.Error>
-          <ErrorPrimitive.Root className="flex items-start gap-2 rounded-xl border border-destructive/20 bg-destructive/5 px-4 py-3 text-destructive">
+          <ErrorPrimitive.Root className="mt-3 rounded-xl border border-destructive/20 bg-destructive/5 px-3 py-2 text-sm text-destructive">
             <AlertCircle className="mt-0.5 size-4 shrink-0" />
-            <ErrorPrimitive.Message className="text-sm leading-6" />
+            <ErrorPrimitive.Message />
           </ErrorPrimitive.Root>
         </MessagePrimitive.Error>
         <ActionBarPrimitive.Root
           hideWhenRunning
           autohide="not-last"
-          className="-ml-2 mt-4 flex items-center gap-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
+          className="flex items-center gap-1 pt-1 opacity-100 transition sm:opacity-0 sm:group-hover:opacity-100 sm:focus-within:opacity-100"
         >
-          <ActionBarPrimitive.Copy className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <ActionBarPrimitive.Copy className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
             <Copy className="size-4" /><span className="sr-only">复制内容</span>
           </ActionBarPrimitive.Copy>
-          <ActionBarPrimitive.Reload className="rounded-lg p-2 text-muted-foreground hover:bg-muted hover:text-foreground">
+          <ActionBarPrimitive.Reload className="flex size-8 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground">
             <RefreshCw className="size-4" /><span className="sr-only">重新生成</span>
           </ActionBarPrimitive.Reload>
         </ActionBarPrimitive.Root>

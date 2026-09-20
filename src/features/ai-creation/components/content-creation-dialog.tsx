@@ -15,9 +15,10 @@ interface ContentCreationDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   onSubmit: (values: ContentCreationValues) => Promise<void>
+  originPoint?: { x: number; y: number } | null
 }
 
-export function ContentCreationDialog({ open, onOpenChange, onSubmit }: ContentCreationDialogProps) {
+export function ContentCreationDialog({ open, onOpenChange, onSubmit, originPoint }: ContentCreationDialogProps) {
   const submit = async (values: ContentCreationValues) => {
     await onSubmit(values)
     onOpenChange(false)
@@ -25,7 +26,7 @@ export function ContentCreationDialog({ open, onOpenChange, onSubmit }: ContentC
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent>
+      <DialogContent originPoint={originPoint}>
         <DialogHeader className="pr-8">
           <div className="mb-2 flex size-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
             <WandSparkles className="size-5" />
